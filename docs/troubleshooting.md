@@ -15,8 +15,10 @@ permalink: /docs/troubleshooting/
 
 ## `NvmNotReady` on `Init()`
 
-Power-up not complete (~3 ms) or a genuine NVM error. Retry after a delay; if
-`nvm_err` persists the part is faulty.
+Power-up not complete (~3 ms) or a genuine NVM error. `Init()` already issues
+one soft reset and re-checks when it sees `STATUS == 0` with a valid chip id —
+observed on a BMP581 breakout whose NVM boot had not completed after power-up.
+If `nvm_err` persists after that, the part is faulty.
 
 ## `PorSoftReset`
 

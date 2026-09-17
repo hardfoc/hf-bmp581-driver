@@ -64,7 +64,16 @@ public:
         if (id == 0) {
             return DriverResult<void>::failure(DriverError::InvalidChipId);
         }
-        const DriverError nvm = NvmReadyCheck();
+        DriverError nvm = NvmReadyCheck();
+        if (nvm == DriverError::NvmNotReady) {
+            /* Seen on hardware: a part that answers its chip id with STATUS == 0
+             * (core/NVM boot never completed after power-up). A soft reset
+             * re-runs the NVM boot; give it t_soft_reset + margin and re-check. */
+            if (WriteReg(reg::kCmd, cmd::kSoftReset)) {
+                bus_.DelayUs(timing::kSoftResetUs + timing::kStartupUs);
+                nvm = NvmReadyCheck();
+            }
+        }
         if (nvm != DriverError::None) {
             return DriverResult<void>::failure(nvm);
         }
