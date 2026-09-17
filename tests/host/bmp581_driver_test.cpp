@@ -28,6 +28,7 @@ public:
     uint32_t delayed_us{0};
     std::vector<std::pair<uint8_t, uint8_t>> writes;
     bool fail_bus{false};
+    uint8_t status_after_reset{0xFF};  // 0xFF = leave STATUS unchanged on soft reset
 
     FakeBus() {
         regs[bmp581::reg::kChipId] = bmp581::chip_id::kPrimary;
@@ -47,6 +48,9 @@ public:
                 if (data[i] == bmp581::cmd::kSoftReset) {
                     regs[bmp581::reg::kIntStatus] |= bmp581::int_status::kPorSoftResetComplete;
                     regs[bmp581::reg::kOdrConfig] = bmp581::odr_config::kDeepDisableMask;
+                    if (status_after_reset != 0xFF) {
+                        regs[bmp581::reg::kStatus] = status_after_reset;
+                    }
                 }
                 continue;
             }
@@ -80,6 +84,18 @@ void TestInitAndReset() {
     nvm.regs[bmp581::reg::kStatus] = bmp581::status::kNvmErr | bmp581::status::kNvmRdy;
     bmp581::Driver<FakeBus> dnvm(nvm);
     CHECK(dnvm.Init().error == bmp581::DriverError::NvmNotReady);
+
+    // STATUS == 0 with a valid chip id → Init soft-resets once and re-checks (bench-observed).
+    FakeBus cold;
+    cold.regs[bmp581::reg::kStatus] = 0x00;
+    cold.status_after_reset = bmp581::status::kNvmRdy | bmp581::status::kCoreRdy;
+    bmp581::Driver<FakeBus> dcold(cold);
+    CHECK(dcold.Init().ok());
+    CHECK(cold.delayed_us >= bmp581::timing::kSoftResetUs);
+    FakeBus dead;
+    dead.regs[bmp581::reg::kStatus] = 0x00;  // stays 0 after reset
+    bmp581::Driver<FakeBus> ddead(dead);
+    CHECK(ddead.Init().error == bmp581::DriverError::NvmNotReady);
 
     FakeBus off;
     off.fail_bus = true;
