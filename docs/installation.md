@@ -20,7 +20,7 @@ The driver is **header-only**. CMake generates `bmp581_version.h` and exposes an
 ## As a git submodule
 
 ```bash
-git submodule add https://github.com/N3b3x/hf-bmp581-driver.git external/hf-bmp581-driver
+git submodule add https://github.com/hardfoc/hf-bmp581-driver.git external/hf-bmp581-driver
 git submodule update --init --recursive
 ```
 

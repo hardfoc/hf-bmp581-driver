@@ -8,7 +8,7 @@ permalink: /docs/api-reference/
 
 # API reference
 
-Authoritative declarations live under [`inc/`](https://github.com/N3b3x/hf-bmp581-driver/tree/main/inc).
+Authoritative declarations live under [`inc/`](https://github.com/hardfoc/hf-bmp581-driver/tree/main/inc).
 Run **Doxygen** (`doxygen _config/Doxyfile`) for HTML cross-links.
 
 ## Transport — `bmp581::BusInterface<Derived>`
