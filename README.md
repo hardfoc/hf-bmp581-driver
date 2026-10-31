@@ -17,8 +17,8 @@ Bosch BMP5 Sensor API (BSD-3).
 
 [![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/N3b3x/hf-bmp581-driver/actions/workflows/esp32-examples-build-ci.yml/badge.svg?branch=main)](https://github.com/N3b3x/hf-bmp581-driver/actions/workflows/esp32-examples-build-ci.yml)
-[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://n3b3x.github.io/hf-bmp581-driver/)
+[![CI](https://github.com/hardfoc/hf-bmp581-driver/actions/workflows/esp32-examples-build-ci.yml/badge.svg?branch=main)](https://github.com/hardfoc/hf-bmp581-driver/actions/workflows/esp32-examples-build-ci.yml)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://hardfoc.github.io/hf-bmp581-driver/)
 
 ## Table of contents
 
@@ -32,7 +32,7 @@ Bosch BMP5 Sensor API (BSD-3).
 
 ## Overview
 
-> **[Live documentation (GitHub Pages)](https://n3b3x.github.io/hf-bmp581-driver/)** —
+> **[Live documentation (GitHub Pages)](https://hardfoc.github.io/hf-bmp581-driver/)** —
 > Installation, register interface, CMake, API summary, and troubleshooting.
 
 The driver targets an **absolute-pressure reference** in host firmware (density

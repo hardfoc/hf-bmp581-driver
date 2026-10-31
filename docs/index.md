@@ -10,9 +10,9 @@ has_children: true
 
 # HF-BMP581 driver documentation
 
-This site mirrors the [`docs/`](https://github.com/N3b3x/hf-bmp581-driver/tree/main/docs) folder in the repository and documents the **Bosch BMP581** barometric pressure sensor register interface as implemented by this header-only driver (register sequences ported from the Bosch BMP5 Sensor API v1.1.1).
+This site mirrors the [`docs/`](https://github.com/hardfoc/hf-bmp581-driver/tree/main/docs) folder in the repository and documents the **Bosch BMP581** barometric pressure sensor register interface as implemented by this header-only driver (register sequences ported from the Bosch BMP5 Sensor API v1.1.1).
 
-> **Browse on GitHub:** [repository home](https://github.com/N3b3x/hf-bmp581-driver) · [Issues](https://github.com/N3b3x/hf-bmp581-driver/issues)
+> **Browse on GitHub:** [repository home](https://github.com/hardfoc/hf-bmp581-driver) · [Issues](https://github.com/hardfoc/hf-bmp581-driver/issues)
 
 ## Documentation structure
 
