@@ -1,0 +1,429 @@
+{"0": {
+    "doc": "Datasheets and links",
+    "title": "Datasheets (local copies)",
+    "content": "Place vendor PDFs here (Bosch BMP581 data sheet BST-BMP581-DS004). Paths under this folder are ignored from strict driver linting in CI where applicable. Official references: . | Bosch Sensortec BMP581 product page and data sheet | boschsensortec/BMP5_SensorAPI — reference C API (BSD-3), see THIRD_PARTY_NOTICES.md | . Back: Documentation home → . ",
+    "url": "/hf-bmp581-driver/development/docs/datasheet/#datasheets-local-copies",
+    
+    "relUrl": "/docs/datasheet/#datasheets-local-copies"
+  },"1": {
+    "doc": "Datasheets and links",
+    "title": "Datasheets and links",
+    "content": " ",
+    "url": "/hf-bmp581-driver/development/docs/datasheet/",
+    
+    "relUrl": "/docs/datasheet/"
+  },"2": {
+    "doc": "HardFOC BMP581 Driver",
+    "title": "HF-BMP581 Driver",
+    "content": "Header-only C++17 driver for the Bosch BMP581 barometric pressure sensor: chip-id / NVM-ready init, POR-checked soft reset, power modes with the mandatory standby hop, OSR / ODR, IIR (standby-only write with mode restore), interrupt pin and source configuration, data-ready polling, 24-bit pressure (1/64 Pa) and temperature (1/65536 °C), NVM user-word read. Register sequences ported from the Bosch BMP5 Sensor API (BSD-3). ",
+    "url": "/hf-bmp581-driver/development/#hf-bmp581-driver",
+    
+    "relUrl": "/#hf-bmp581-driver"
+  },"3": {
+    "doc": "HardFOC BMP581 Driver",
+    "title": "Table of contents",
+    "content": ". | Overview | Features | Quick start | Documentation | Examples | Official references | License | . ",
+    "url": "/hf-bmp581-driver/development/#table-of-contents",
+    
+    "relUrl": "/#table-of-contents"
+  },"4": {
+    "doc": "HardFOC BMP581 Driver",
+    "title": "Overview",
+    "content": "Live documentation (GitHub Pages) — Installation, register interface, CMake, API summary, and troubleshooting. The driver targets an absolute-pressure reference in host firmware (density compensation, gauge → absolute conversion, altitude). The BMP581 offers ±30 Pa typical absolute accuracy, 0.08 Pa RMS noise and up to 240 Hz ODR; a BarometricReferencePreset() (100 Hz, OSR ×8, IIR 3) is provided. One CRTP register transport shape serves both I2C and SPI. FIFO and out-of-range features are intentionally not ported. ",
+    "url": "/hf-bmp581-driver/development/#overview",
+    
+    "relUrl": "/#overview"
+  },"5": {
+    "doc": "HardFOC BMP581 Driver",
+    "title": "Features",
+    "content": ". | CRTP bmp581::BusInterface&lt;Derived&gt; — no virtual calls; you provide WriteRegs / ReadRegs / DelayUs / EnsureInitialized. | bmp581::Driver&lt;BusT&gt; — Init, SoftReset, Configure, Set/GetPowerMode, Set/GetOsrOdr, GetEffectiveOsr, Set/GetIir, ConfigureInterrupt, SelectInterruptSources, DataReady, ReadSample, ReadNvm, raw register access. | Typed results — DriverResult&lt;T&gt; with stable DriverError codes. | Complete register map with bit-field masks and OdrHz() helper. | No heap allocation; fits FreeRTOS / bare metal. | Host tests (-DHF_BMP581_BUILD_TESTS=ON) against a register-map fake; ESP32-S3 examples. | . ",
+    "url": "/hf-bmp581-driver/development/#features",
+    
+    "relUrl": "/#features"
+  },"6": {
+    "doc": "HardFOC BMP581 Driver",
+    "title": "Quick start",
+    "content": "| 1 2 . | add_subdirectory(/path/to/hf-bmp581-driver) target_link_libraries(your_target PRIVATE hf::bmp581) . | . | 1 2 3 4 5 6 7 8 . | #include \"bmp581.hpp\" MyBus bus; // inherits bmp581::BusInterface&lt;MyBus&gt; bmp581::Driver&lt;MyBus&gt; dev(bus); dev.Init(); dev.SoftReset(); dev.Configure(bmp581::BarometricReferencePreset()); auto s = dev.ReadSample(); // s.value.pressure_pa, s.value.temperature_c . | . ",
+    "url": "/hf-bmp581-driver/development/#quick-start",
+    
+    "relUrl": "/#quick-start"
+  },"7": {
+    "doc": "HardFOC BMP581 Driver",
+    "title": "Documentation",
+    "content": ". | Installation · Quick start · Register interface · Hardware setup · CMake integration · API reference · Examples · Troubleshooting · Datasheets | . ",
+    "url": "/hf-bmp581-driver/development/#documentation",
+    
+    "relUrl": "/#documentation"
+  },"8": {
+    "doc": "HardFOC BMP581 Driver",
+    "title": "Examples",
+    "content": "examples/esp32/ — bmp581_minimal_example (init + 1 Hz print) and bmp581_baro_demo (data-ready polling, noise statistics). Build with ./scripts/build_app.sh &lt;app&gt; Debug after git submodule update --init --recursive. ",
+    "url": "/hf-bmp581-driver/development/#examples",
+    
+    "relUrl": "/#examples"
+  },"9": {
+    "doc": "HardFOC BMP581 Driver",
+    "title": "Official references",
+    "content": ". | Bosch BMP581 data sheet (BST-BMP581-DS004) | boschsensortec/BMP5_SensorAPI v1.1.1 (BSD-3) — see THIRD_PARTY_NOTICES.md | . ",
+    "url": "/hf-bmp581-driver/development/#official-references",
+    
+    "relUrl": "/#official-references"
+  },"10": {
+    "doc": "HardFOC BMP581 Driver",
+    "title": "License",
+    "content": "MIT — see LICENSE. Register procedures ported from Bosch’s BSD-3 Sensor API; notice reproduced in THIRD_PARTY_NOTICES.md. ",
+    "url": "/hf-bmp581-driver/development/#license",
+    
+    "relUrl": "/#license"
+  },"11": {
+    "doc": "HardFOC BMP581 Driver",
+    "title": "HardFOC BMP581 Driver",
+    "content": " ",
+    "url": "/hf-bmp581-driver/development/",
+    
+    "relUrl": "/"
+  },"12": {
+    "doc": "API reference",
+    "title": "API reference",
+    "content": "Authoritative declarations live under inc/. Run Doxygen (doxygen _config/Doxyfile) for HTML cross-links. ",
+    "url": "/hf-bmp581-driver/development/docs/api-reference/",
+    
+    "relUrl": "/docs/api-reference/"
+  },"13": {
+    "doc": "API reference",
+    "title": "Transport — bmp581::BusInterface&lt;Derived&gt;",
+    "content": "CRTP base. Implement: . | bool WriteRegs(uint8_t reg, const uint8_t* data, size_t len); | bool ReadRegs(uint8_t reg, uint8_t* out, size_t len); | void DelayUs(uint32_t us); | bool EnsureInitialized(); | . ",
+    "url": "/hf-bmp581-driver/development/docs/api-reference/#transport--bmp581businterfacederived",
+    
+    "relUrl": "/docs/api-reference/#transport--bmp581businterfacederived"
+  },"14": {
+    "doc": "API reference",
+    "title": "Driver — bmp581::Driver&lt;BusT&gt;",
+    "content": "| Method | Description | . | Init() | chip id + NVM ready; ChipId() afterwards | . | SoftReset() | CMD 0xB6 with POR check | . | Configure(Config) | standby → OSR/ODR → IIR → power mode | . | GetPowerMode() / SetPowerMode(mode) | with mandatory standby hop | . | GetOsrOdr() / SetOsrOdr(cfg) | OSR_CONFIG / ODR_CONFIG | . | GetEffectiveOsr() | OSR_EFF incl. odr_valid | . | GetIir() / SetIir(cfg) | DSP_CONFIG / DSP_IIR (standby-only, mode restored) | . | ConfigureInterrupt(cfg) / SelectInterruptSources(src) | INT_CONFIG / INT_SOURCE | . | ReadInterruptStatus() / DataReady() | INT_STATUS | . | ReadSample(pressure_enabled = true) | 6-byte burst → Sample | . | DecodeSample(bytes, pressure_enabled) | static decode helper (tests) | . | ReadNvm(addr) | user word 0x20..0x22 | . | ReadRegister(r) / WriteRegister(r, v) | raw access | . ",
+    "url": "/hf-bmp581-driver/development/docs/api-reference/#driver--bmp581driverbust",
+    
+    "relUrl": "/docs/api-reference/#driver--bmp581driverbust"
+  },"15": {
+    "doc": "API reference",
+    "title": "Types (bmp581_types.hpp)",
+    "content": ". | DriverResult&lt;T&gt; / DriverError — None, InvalidParameter, NotInitialized, Bus, InvalidChipId, NvmNotReady, PorSoftReset, InvalidPowerMode, NvmInvalidAddr, NvmCommandError | OsrOdrConfig, IirConfig, EffectiveOsr, InterruptConfig, InterruptSources, Sample, Config | BarometricReferencePreset() — 100 Hz, OSR ×8/×1, IIR 3, Normal | . ",
+    "url": "/hf-bmp581-driver/development/docs/api-reference/#types-bmp581_typeshpp",
+    
+    "relUrl": "/docs/api-reference/#types-bmp581_typeshpp"
+  },"16": {
+    "doc": "API reference",
+    "title": "Enumerations (bmp581_registers.hpp)",
+    "content": "PowerMode, Oversampling, Odr (+ OdrHz()), IirFilter, IntMode, IntPolarity, IntDrive; namespaces addr, chip_id, reg, cmd, timing, status, int_status, int_source, bit-field masks. Next: Examples → . ",
+    "url": "/hf-bmp581-driver/development/docs/api-reference/#enumerations-bmp581_registershpp",
+    
+    "relUrl": "/docs/api-reference/#enumerations-bmp581_registershpp"
+  },"17": {
+    "doc": "CMake integration",
+    "title": "CMake integration",
+    "content": " ",
+    "url": "/hf-bmp581-driver/development/docs/cmake-integration/",
+    
+    "relUrl": "/docs/cmake-integration/"
+  },"18": {
+    "doc": "CMake integration",
+    "title": "Standalone consumer",
+    "content": "| 1 2 . | add_subdirectory(path/to/hf-bmp581-driver) target_link_libraries(app PRIVATE hf::bmp581) . | . ",
+    "url": "/hf-bmp581-driver/development/docs/cmake-integration/#standalone-consumer",
+    
+    "relUrl": "/docs/cmake-integration/#standalone-consumer"
+  },"19": {
+    "doc": "CMake integration",
+    "title": "Settings file only",
+    "content": "cmake/hf_bmp581_build_settings.cmake is include_guarded and sets: . | Variable | Purpose | . | HF_BMP581_TARGET_NAME | hf_bmp581 | . | HF_BMP581_VERSION* | semantic version → generated bmp581_version.h | . | HF_BMP581_PUBLIC_INCLUDE_DIRS | inc/ + generated header dir | . | HF_BMP581_SOURCE_FILES | empty (header-only) | . | HF_BMP581_IDF_REQUIRES | driver (ESP-IDF component wrapper) | . ",
+    "url": "/hf-bmp581-driver/development/docs/cmake-integration/#settings-file-only",
+    
+    "relUrl": "/docs/cmake-integration/#settings-file-only"
+  },"20": {
+    "doc": "CMake integration",
+    "title": "Options",
+    "content": "| Option | Default | Effect | . | HF_BMP581_ENABLE_WARNINGS | OFF | -Wall -Wextra -Wpedantic on consumers | . | HF_BMP581_BUILD_TESTS | OFF | builds tests/host and registers with CTest | . ",
+    "url": "/hf-bmp581-driver/development/docs/cmake-integration/#options",
+    
+    "relUrl": "/docs/cmake-integration/#options"
+  },"21": {
+    "doc": "CMake integration",
+    "title": "ESP-IDF",
+    "content": "examples/esp32/components/hf_bmp581/CMakeLists.txt wraps the settings file as an IDF component; add the component directory to EXTRA_COMPONENT_DIRS. Next: API reference → . ",
+    "url": "/hf-bmp581-driver/development/docs/cmake-integration/#esp-idf",
+    
+    "relUrl": "/docs/cmake-integration/#esp-idf"
+  },"22": {
+    "doc": "Examples",
+    "title": "Examples",
+    "content": " ",
+    "url": "/hf-bmp581-driver/development/docs/examples/",
+    
+    "relUrl": "/docs/examples/"
+  },"23": {
+    "doc": "Examples",
+    "title": "ESP32-S3 (examples/esp32)",
+    "content": "| App | Role | . | bmp581_minimal_example | init, reset, barometric preset, 1 Hz pressure/temperature | . | bmp581_baro_demo | data-ready polling at 100 Hz, IIR bypass, noise statistics | . | 1 2 3 4 . | cd examples/esp32 git submodule update --init --recursive ./scripts/build_app.sh bmp581_minimal_example Debug ./scripts/flash_app.sh bmp581_minimal_example Debug . | . Wiring and address details: Hardware setup and examples/esp32/README.md. ",
+    "url": "/hf-bmp581-driver/development/docs/examples/#esp32-s3-examplesesp32",
+    
+    "relUrl": "/docs/examples/#esp32-s3-examplesesp32"
+  },"24": {
+    "doc": "Examples",
+    "title": "Transport adapter",
+    "content": "examples/esp32/main/include/hf_bmp581_esp_i2c.hpp — Bmp581EspIdfI2c&lt;port, sda, scl, addr, hz&gt; implements the four CRTP calls with the legacy ESP-IDF driver/i2c.h API. Next: Troubleshooting → . ",
+    "url": "/hf-bmp581-driver/development/docs/examples/#transport-adapter",
+    
+    "relUrl": "/docs/examples/#transport-adapter"
+  },"25": {
+    "doc": "Hardware setup",
+    "title": "Hardware setup",
+    "content": " ",
+    "url": "/hf-bmp581-driver/development/docs/hardware-setup/",
+    
+    "relUrl": "/docs/hardware-setup/"
+  },"26": {
+    "doc": "Hardware setup",
+    "title": "Electrical",
+    "content": ". | VDD 1.71–3.6 V, VDDIO 1.08–3.6 V (independent). | I2C up to 1 MHz (Fm+); SPI 4-wire / 3-wire up to 12 MHz; I3C. | 2.0 × 2.0 × 0.75 mm metal-lid LGA — use a breakout for bench work. | . ",
+    "url": "/hf-bmp581-driver/development/docs/hardware-setup/#electrical",
+    
+    "relUrl": "/docs/hardware-setup/#electrical"
+  },"27": {
+    "doc": "Hardware setup",
+    "title": "Address / interface select",
+    "content": "| Pin | I2C | SPI | . | CSB | high | chip select (active low) | . | SDO | low → 0x46, high → 0x47 | MISO | . Breakouts: SparkFun SEN-20170 (Qwiic, default 0x47, jumper for 0x46 and SPI), Adafruit 6407 (STEMMA QT, I2C or SPI). ",
+    "url": "/hf-bmp581-driver/development/docs/hardware-setup/#address--interface-select",
+    
+    "relUrl": "/docs/hardware-setup/#address--interface-select"
+  },"28": {
+    "doc": "Hardware setup",
+    "title": "Placement for a barometric reference",
+    "content": ". | Vent the sensor to the volume whose pressure you want (enclosure ambient for an atmospheric reference); keep it away from fans and heat sources. | Temperature-induced offset is ±0.5 Pa/K — thermal stability matters more than sampling rate. | Solder drift is a few tenths of hPa; a one-point comparison against a reference after assembly is good practice when absolute accuracy matters. | . ",
+    "url": "/hf-bmp581-driver/development/docs/hardware-setup/#placement-for-a-barometric-reference",
+    
+    "relUrl": "/docs/hardware-setup/#placement-for-a-barometric-reference"
+  },"29": {
+    "doc": "Hardware setup",
+    "title": "Performance (data sheet)",
+    "content": "| Parameter | Value | . | Range | 30–125 kPa (full accuracy 300–1100 hPa) | . | Absolute accuracy | ±30 Pa typ. (300–1100 hPa, −5…65 °C) | . | Relative accuracy | ±6 Pa per 10 kPa step | . | Noise | 0.08 Pa RMS (lowest bandwidth, highest resolution) | . | ODR | 0.125–240 Hz normal, up to 480 Hz continuous | . Next: CMake integration → . ",
+    "url": "/hf-bmp581-driver/development/docs/hardware-setup/#performance-data-sheet",
+    
+    "relUrl": "/docs/hardware-setup/#performance-data-sheet"
+  },"30": {
+    "doc": "Documentation",
+    "title": "HF-BMP581 driver documentation",
+    "content": "This site mirrors the docs/ folder in the repository and documents the Bosch BMP581 barometric pressure sensor register interface as implemented by this header-only driver (register sequences ported from the Bosch BMP5 Sensor API v1.1.1). Browse on GitHub: repository home · Issues . ",
+    "url": "/hf-bmp581-driver/development/docs/#hf-bmp581-driver-documentation",
+    
+    "relUrl": "/docs/#hf-bmp581-driver-documentation"
+  },"31": {
+    "doc": "Documentation",
+    "title": "Documentation structure",
+    "content": " ",
+    "url": "/hf-bmp581-driver/development/docs/#documentation-structure",
+    
+    "relUrl": "/docs/#documentation-structure"
+  },"32": {
+    "doc": "Documentation",
+    "title": "Getting started",
+    "content": ". | Installation — Toolchain, CMake, submodule layout | Quick start — Minimal CRTP register adapter and first sample | Register interface — Register map, power modes, OSR/ODR, IIR, interrupts, scaling | . ",
+    "url": "/hf-bmp581-driver/development/docs/#getting-started",
+    
+    "relUrl": "/docs/#getting-started"
+  },"33": {
+    "doc": "Documentation",
+    "title": "Hardware and integration",
+    "content": ". | Hardware setup — Address select, I2C vs SPI, supply, mounting | CMake integration — hf_bmp581_build_settings.cmake, hf::bmp581 | . ",
+    "url": "/hf-bmp581-driver/development/docs/#hardware-and-integration",
+    
+    "relUrl": "/docs/#hardware-and-integration"
+  },"34": {
+    "doc": "Documentation",
+    "title": "Reference and examples",
+    "content": ". | API reference — Driver&lt;BusT&gt;, types, results | Examples — ESP32-S3 build_app.sh workflow | Troubleshooting — Chip id, NVM, POR, ODR validity | . ",
+    "url": "/hf-bmp581-driver/development/docs/#reference-and-examples",
+    
+    "relUrl": "/docs/#reference-and-examples"
+  },"35": {
+    "doc": "Documentation",
+    "title": "Manufacturer",
+    "content": ". | Datasheet and links — Bundled PDF and Bosch references | . Back: Repository README → . ",
+    "url": "/hf-bmp581-driver/development/docs/#manufacturer",
+    
+    "relUrl": "/docs/#manufacturer"
+  },"36": {
+    "doc": "Documentation",
+    "title": "Documentation",
+    "content": " ",
+    "url": "/hf-bmp581-driver/development/docs/",
+    
+    "relUrl": "/docs/"
+  },"37": {
+    "doc": "Installation",
+    "title": "Installation",
+    "content": "The driver is header-only. CMake generates bmp581_version.h and exposes an INTERFACE target hf::bmp581 for consumers. ",
+    "url": "/hf-bmp581-driver/development/docs/installation/",
+    
+    "relUrl": "/docs/installation/"
+  },"38": {
+    "doc": "Installation",
+    "title": "Requirements",
+    "content": ". | C++17 compiler (GCC 9+, Clang 10+, ESP-IDF toolchains) | CMake 3.16+ | An I2C or SPI master able to do register writes / auto-increment reads | . ",
+    "url": "/hf-bmp581-driver/development/docs/installation/#requirements",
+    
+    "relUrl": "/docs/installation/#requirements"
+  },"39": {
+    "doc": "Installation",
+    "title": "As a git submodule",
+    "content": "| 1 2 . | git submodule add https://github.com/hardfoc/hf-bmp581-driver.git external/hf-bmp581-driver git submodule update --init --recursive . | . | 1 2 . | add_subdirectory(external/hf-bmp581-driver) target_link_libraries(my_firmware PRIVATE hf::bmp581) . | . ",
+    "url": "/hf-bmp581-driver/development/docs/installation/#as-a-git-submodule",
+    
+    "relUrl": "/docs/installation/#as-a-git-submodule"
+  },"40": {
+    "doc": "Installation",
+    "title": "Without add_subdirectory",
+    "content": "| 1 2 . | include(external/hf-bmp581-driver/cmake/hf_bmp581_build_settings.cmake) target_include_directories(my_firmware PRIVATE ${HF_BMP581_PUBLIC_INCLUDE_DIRS}) . | . ",
+    "url": "/hf-bmp581-driver/development/docs/installation/#without-add_subdirectory",
+    
+    "relUrl": "/docs/installation/#without-add_subdirectory"
+  },"41": {
+    "doc": "Installation",
+    "title": "Host tests",
+    "content": "| 1 2 . | cmake -S . -B build -DHF_BMP581_BUILD_TESTS=ON cmake --build build &amp;&amp; ctest --test-dir build . | . The tests run against a register-map fake bus: init / reset, standby hop, OSR/ODR and IIR bit packing, interrupt configuration, 24-bit sample decode (101325 Pa → 0x62F340), NVM read. ",
+    "url": "/hf-bmp581-driver/development/docs/installation/#host-tests",
+    
+    "relUrl": "/docs/installation/#host-tests"
+  },"42": {
+    "doc": "Installation",
+    "title": "Repository layout",
+    "content": "| 1 2 3 4 5 6 7 . | inc/ bmp581.hpp (umbrella), bmp581_driver.hpp, bmp581_types.hpp, bmp581_registers.hpp, bmp581_bus_interface.hpp, bmp581_version.h.in cmake/ build settings + package config template docs/ this documentation examples/ ESP-IDF (ESP32-S3) examples + scripts submodule tests/host/ hardware-free unit tests _config/ Doxygen, Jekyll, lint configuration . | . Next: Quick start → . ",
+    "url": "/hf-bmp581-driver/development/docs/installation/#repository-layout",
+    
+    "relUrl": "/docs/installation/#repository-layout"
+  },"43": {
+    "doc": "Quick start",
+    "title": "Quick start",
+    "content": "You supply a CRTP adapter that inherits bmp581::BusInterface&lt;YourType&gt; and implements four calls: WriteRegs, ReadRegs, DelayUs, EnsureInitialized. | 1 2 3 4 5 6 7 8 9 . | #include \"bmp581.hpp\" class MyBus : public bmp581::BusInterface&lt;MyBus&gt; { public: bool WriteRegs(uint8_t reg, const uint8_t* data, size_t len) noexcept { /* [reg, data…] */ } bool ReadRegs(uint8_t reg, uint8_t* out, size_t len) noexcept { /* write reg, read len */ } void DelayUs(uint32_t us) noexcept { /* RTOS / busy delay */ } bool EnsureInitialized() noexcept { return true; } }; . | . For SPI, set bit 7 of reg on reads (reg | 0x80) and drop the dummy byte the device clocks out after the address; writes use reg &amp; 0x7F. ",
+    "url": "/hf-bmp581-driver/development/docs/quickstart/",
+    
+    "relUrl": "/docs/quickstart/"
+  },"44": {
+    "doc": "Quick start",
+    "title": "First sample",
+    "content": "| 1 2 3 4 5 6 7 8 9 10 11 . | MyBus bus; bmp581::Driver&lt;MyBus&gt; dev(bus); auto r = dev.Init(); // chip id 0x50/0x51 + NVM ready r = dev.SoftReset(); // CMD 0xB6, 2 ms, POR bit checked r = dev.Configure(bmp581::BarometricReferencePreset()); // 100 Hz, OSR x8, IIR 3, Normal auto rdy = dev.DataReady(); // INT_STATUS.drdy if (rdy.ok() &amp;&amp; rdy.value) { auto s = dev.ReadSample(); // s.value.pressure_pa, temperature_c } . | . ",
+    "url": "/hf-bmp581-driver/development/docs/quickstart/#first-sample",
+    
+    "relUrl": "/docs/quickstart/#first-sample"
+  },"45": {
+    "doc": "Quick start",
+    "title": "Choosing a configuration",
+    "content": "| Goal | OSR p / t | ODR | IIR | . | Barometric reference for a control loop | ×8 / ×1 | 100 Hz | 3 | . | Lowest noise, slow | ×128 / ×8 | 5 Hz | 127 | . | Fast altitude / dynamics | ×1 / ×1 | 240 Hz | bypass | . After SetOsrOdr() check GetEffectiveOsr().value.odr_valid: the device downgrades OSR when the combination cannot meet the ODR. ",
+    "url": "/hf-bmp581-driver/development/docs/quickstart/#choosing-a-configuration",
+    
+    "relUrl": "/docs/quickstart/#choosing-a-configuration"
+  },"46": {
+    "doc": "Quick start",
+    "title": "Result handling",
+    "content": "Every call returns bmp581::DriverResult&lt;T&gt;: check .ok() / .error. ToString(error) gives a stable string for logs. Next: Register interface → . ",
+    "url": "/hf-bmp581-driver/development/docs/quickstart/#result-handling",
+    
+    "relUrl": "/docs/quickstart/#result-handling"
+  },"47": {
+    "doc": "Register interface",
+    "title": "Register interface",
+    "content": "Source: Bosch BMP581 data sheet (BST-BMP581-DS004) and BMP5 Sensor API v1.1.1. All values in inc/bmp581_registers.hpp. ",
+    "url": "/hf-bmp581-driver/development/docs/register-interface/",
+    
+    "relUrl": "/docs/register-interface/"
+  },"48": {
+    "doc": "Register interface",
+    "title": "Register map (used subset)",
+    "content": "| Reg | Name | Purpose | . | 0x01 | CHIP_ID | 0x50 / 0x51 | . | 0x02 | REV_ID | silicon revision | . | 0x14 | INT_CONFIG | mode / polarity / drive / enable | . | 0x15 | INT_SOURCE | drdy, fifo_full, fifo_thr, oor_p | . | 0x1D–0x1F | TEMP_DATA | 24-bit two’s complement, 1/65536 °C | . | 0x20–0x22 | PRESS_DATA | 24-bit unsigned, 1/64 Pa | . | 0x27 | INT_STATUS | drdy, fifo, oor, por_softreset_complete (0x10) | . | 0x28 | STATUS | core_rdy, nvm_rdy (0x02), nvm_err (0x04), nvm_cmd_err (0x08) | . | 0x2B–0x2D | NVM_ADDR / NVM_DATA | user words 0x20..0x22 | . | 0x30 | DSP_CONFIG | IIR shadow / flush selects | . | 0x31 | DSP_IIR | IIR coefficients (t bits 2:0, p bits 5:3) | . | 0x36 | OSR_CONFIG | osr_t 2:0, osr_p 5:3, press_en 6 | . | 0x37 | ODR_CONFIG | pwr_mode 1:0, odr 6:2, deep_dis 7 | . | 0x38 | OSR_EFF | effective OSR + odr_is_valid (0x80) | . | 0x7E | CMD | 0xB6 soft reset; 0x5D / 0xA5 NVM read enable | . ",
+    "url": "/hf-bmp581-driver/development/docs/register-interface/#register-map-used-subset",
+    
+    "relUrl": "/docs/register-interface/#register-map-used-subset"
+  },"49": {
+    "doc": "Register interface",
+    "title": "Procedures (as ported)",
+    "content": ". | Init — read CHIP_ID (non-zero → check STATUS nvm_rdy &amp;&amp; !nvm_err) → accept 0x50/0x51. | Soft reset — CMD 0xB6, wait 2 ms, require INT_STATUS.por_softreset_complete. | Power mode — read ODR_CONFIG; if not standby, write standby (deep_dis = 1) and wait t_standby 2.5 ms; then write the target mode. Deep standby = standby with deep_dis = 0 (only reported when ODR ≤ 5 Hz, FIFO off, IIR bypass). | OSR / ODR — ODR faster than 5 Hz requires deep standby disabled; the driver hops to plain standby first. Two-byte write of OSR_CONFIG + ODR_CONFIG preserving mode bits. | IIR — writable in standby only; previous Normal/Forced/Continuous mode restored. | Interrupts — INT_SOURCE = 0, read INT_STATUS to clear, then write INT_CONFIG. | NVM read — standby → NVM_ADDR → CMD 0x5D, 0xA5 → wait 0.8 ms → nvm_rdy → NVM_DATA. | . ",
+    "url": "/hf-bmp581-driver/development/docs/register-interface/#procedures-as-ported",
+    
+    "relUrl": "/docs/register-interface/#procedures-as-ported"
+  },"50": {
+    "doc": "Register interface",
+    "title": "Scaling",
+    "content": "pressure_pa = raw_u24 / 64, temperature_c = raw_s24 / 65536. ",
+    "url": "/hf-bmp581-driver/development/docs/register-interface/#scaling",
+    
+    "relUrl": "/docs/register-interface/#scaling"
+  },"51": {
+    "doc": "Register interface",
+    "title": "Timing",
+    "content": "| Event | Time | . | Soft reset | 2 ms | . | Standby settle | 2.5 ms | . | NVM read ready | 0.8 ms | . | Start-up (POR) | ~3 ms | . Next: Hardware setup → . ",
+    "url": "/hf-bmp581-driver/development/docs/register-interface/#timing",
+    
+    "relUrl": "/docs/register-interface/#timing"
+  },"52": {
+    "doc": "Troubleshooting",
+    "title": "Troubleshooting",
+    "content": " ",
+    "url": "/hf-bmp581-driver/development/docs/troubleshooting/",
+    
+    "relUrl": "/docs/troubleshooting/"
+  },"53": {
+    "doc": "Troubleshooting",
+    "title": "InvalidChipId",
+    "content": ". | Wrong address (0x46 vs 0x47 — SDO level) or a different part on the bus. | SPI: the first read after power-up can be invalid; issue a dummy read or call Init() twice. | . ",
+    "url": "/hf-bmp581-driver/development/docs/troubleshooting/#invalidchipid",
+    
+    "relUrl": "/docs/troubleshooting/#invalidchipid"
+  },"54": {
+    "doc": "Troubleshooting",
+    "title": "NvmNotReady on Init()",
+    "content": "Power-up not complete (~3 ms) or a genuine NVM error. Init() already issues one soft reset and re-checks when it sees STATUS == 0 with a valid chip id — observed on a BMP581 breakout whose NVM boot had not completed after power-up. If nvm_err persists after that, the part is faulty. ",
+    "url": "/hf-bmp581-driver/development/docs/troubleshooting/#nvmnotready-on-init",
+    
+    "relUrl": "/docs/troubleshooting/#nvmnotready-on-init"
+  },"55": {
+    "doc": "Troubleshooting",
+    "title": "PorSoftReset",
+    "content": "INT_STATUS did not report por_softreset_complete 2 ms after CMD 0xB6. Check that the bus is not stuck and that nothing else read INT_STATUS in between (reading clears it in pulsed mode). ",
+    "url": "/hf-bmp581-driver/development/docs/troubleshooting/#porsoftreset",
+    
+    "relUrl": "/docs/troubleshooting/#porsoftreset"
+  },"56": {
+    "doc": "Troubleshooting",
+    "title": "odr_valid == false",
+    "content": "The OSR pair cannot be completed within the ODR period; the device lowered the effective OSR. Reduce OSR or ODR (see the data-sheet OSR/ODR table). ",
+    "url": "/hf-bmp581-driver/development/docs/troubleshooting/#odr_valid--false",
+    
+    "relUrl": "/docs/troubleshooting/#odr_valid--false"
+  },"57": {
+    "doc": "Troubleshooting",
+    "title": "Readings do not change",
+    "content": ". | Power mode still Standby — call SetPowerMode(Normal) or Configure(). | Forced mode gives one sample then returns to standby by design. | . ",
+    "url": "/hf-bmp581-driver/development/docs/troubleshooting/#readings-do-not-change",
+    
+    "relUrl": "/docs/troubleshooting/#readings-do-not-change"
+  },"58": {
+    "doc": "Troubleshooting",
+    "title": "Noisy pressure",
+    "content": "Raise pressure OSR, enable IIR (SetIir), or average on the host. Remember IIR is standby-only to write; the driver handles the hop. Back: Documentation home → . ",
+    "url": "/hf-bmp581-driver/development/docs/troubleshooting/#noisy-pressure",
+    
+    "relUrl": "/docs/troubleshooting/#noisy-pressure"
+  },"59": {
+    "doc": "Third-party notices",
+    "title": "Third-party notices",
+    "content": "# Third-party notices This driver is a C++17 port of the register sequences in the Bosch Sensortec **BMP5 Sensor API** (`bmp5.c`, `bmp5_defs.h`, v1.1.1, [github.com/boschsensortec/BMP5_SensorAPI](https://github.com/boschsensortec/BMP5_SensorAPI)), distributed under the BSD 3-Clause license reproduced below. Register addresses, bit masks, timing constants and the init / reset / power-mode / OSR-ODR / IIR / interrupt / NVM procedures follow that API; the FIFO and out-of-range features are not ported. No Bosch source files are included verbatim. ``` Copyright (c) 2026 Bosch Sensortec GmbH. All rights reserved. BSD-3-Clause Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. ``` ",
+    "url": "/hf-bmp581-driver/development/THIRD_PARTY_NOTICES.html",
+    
+    "relUrl": "/THIRD_PARTY_NOTICES.html"
+  },"60": {
+    "doc": "ESP32 examples — HF-BMP581 (Bosch barometric pressure sensor)",
+    "title": "ESP32 examples — HF-BMP581 (Bosch barometric pressure sensor)",
+    "content": "# ESP32 examples — HF-BMP581 (Bosch barometric pressure sensor) ESP-IDF examples for the **BMP581** over I2C. Default address **0x47** (SDO high); use `0x46` with SDO low. **400 kHz** I2C (device supports 1 MHz Fm+). ## Prerequisites - ESP-IDF **v5.4+** (CI uses `release/v5.5`) - Python 3 with PyYAML (for `scripts/generate_matrix.py`) ## One-time setup From `examples/esp32/`: ```bash git submodule update --init --recursive ``` This pulls `scripts/` (**hf-espidf-project-tools**): `build_app.sh`, `flash_app.sh`, and `generate_matrix.py` (same layout as other `hf-*-driver` submodules). ## Default wiring (ESP32-S3) | MCU signal | GPIO (default) | Sensor |------------|----------------|--------| SDA | **8** | SDA | SCL | **9** | SCL | 3V3 | VDD / VDDIO | 1.71–3.6 V | GND | GND | GND | Breakouts (SparkFun SEN-20170, Adafruit 6407) include pull-ups and default to 0x47. Change the `using Bus = Bmp581EspIdfI2c` alias to move pins, address or speed. ## Apps (`app_config.yml`) | App | Role |-----|------| `bmp581_minimal_example` | init, reset, barometric preset, 1 Hz print | `bmp581_baro_demo` | data-ready polling at 100 Hz, IIR bypass, noise statistics | ```bash ./scripts/build_app.sh list ./scripts/build_app.sh bmp581_minimal_example Debug ./scripts/flash_app.sh bmp581_minimal_example Debug ``` ",
+    "url": "/hf-bmp581-driver/development/examples/esp32/",
+    
+    "relUrl": "/examples/esp32/"
+  }
+}

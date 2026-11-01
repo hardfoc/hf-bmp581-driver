@@ -1,0 +1,13 @@
+<map id="inc/bmp581_driver.hpp" name="inc/bmp581_driver.hpp">
+<area shape="rect" id="Node000001" title="Bosch BMP581 barometric pressure sensor client (I2C or SPI via CRTP bus)." alt="" coords="129,5,299,33"/>
+<area shape="rect" id="Node000002" href="$bmp581_8hpp.html" title="Umbrella header for the HF&#45;BMP581 barometric pressure sensor driver." alt="" coords="151,81,277,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="215,46,217,81,211,80,213,51"/>
+<area shape="rect" id="Node000003" href="$bmp581__baro__demo_8cpp.html" title=" " alt="" coords="5,266,191,311"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="160,118,136,135,115,158,103,185,97,214,98,267,92,265,92,213,98,183,110,155,133,131,164,114"/>
+<area shape="rect" id="Node000004" href="$bmp581__minimal__example_8cpp.html" title=" " alt="" coords="220,266,450,311"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="265,113,294,131,318,155,331,183,338,213,340,267,335,265,333,214,326,185,313,158,291,135,265,118"/>
+<area shape="rect" id="Node000005" href="$hf__bmp581__esp__i2c_8hpp.html" title="Reusable ESP&#45;IDF I2C register transport for bmp581::Driver (CRTP)." alt="" coords="124,157,304,218"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="215,122,216,157,212,155,213,127"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="169,228,125,268,122,264,164,230"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="264,226,312,266,306,266,262,231"/>
+</map>

@@ -1,0 +1,16 @@
+warning: ignoring unsupported tag 'PAGE_OUTLINE_PANEL' at line 1763, file /tmp/doxyfile.VOalfS
+warning: Tag 'DOT_TRANSPARENT' at line 2786 of file '/tmp/doxyfile.VOalfS' has become obsolete.
+         To avoid this warning please remove this line from your configuration file or upgrade it using "doxygen -u"
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/docs/datasheet/README.md:2: warning: found more than one \mainpage comment block! (first occurrence: /home/runner/work/hf-bmp581-driver/hf-bmp581-driver/README.md, line 2), Skipping current block!
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/inc/bmp581.hpp:21: warning: unable to resolve reference to 'bmp581_version.h' for \ref command
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/inc/bmp581.hpp:21: warning: unable to resolve reference to 'bmp581_version.h' for \ref command
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/docs/examples.md:19: warning: unable to resolve reference to '/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/examples/esp32/README.md' for \ref command
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/inc/bmp581.hpp:21: warning: unable to resolve reference to 'bmp581_version.h' for \ref command
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/inc/bmp581.hpp:21: warning: unable to resolve reference to 'bmp581_version.h' for \ref command
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/README.md:18: warning: unable to resolve reference to 'overview' for \ref command
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/README.md:19: warning: unable to resolve reference to 'features' for \ref command
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/README.md:20: warning: unable to resolve reference to 'quick-start' for \ref command
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/README.md:21: warning: unable to resolve reference to 'documentation' for \ref command
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/README.md:23: warning: unable to resolve reference to 'official-references' for \ref command
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/README.md:24: warning: unable to resolve reference to 'license' for \ref command
+/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/README.md:86: warning: unable to resolve reference to '/home/runner/work/hf-bmp581-driver/hf-bmp581-driver/THIRD_PARTY_NOTICES.md' for \ref command

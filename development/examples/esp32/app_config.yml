@@ -1,0 +1,62 @@
+---
+# ESP32 HF-BMP581 Driver — app matrix for build scripts / CI
+version: "1.0"
+
+metadata:
+  project: "ESP32 HF-BMP581 Driver Examples"
+  default_app: "bmp581_minimal_example"
+  target: "esp32s3"
+  idf_versions: ["release/v5.5", "release/v5.4"]
+  build_types: [["Debug", "Release"], ["Debug"]]
+
+apps:
+  bmp581_minimal_example:
+    description: "BMP581: init, soft reset, 100 Hz barometric preset, 1 Hz pressure/temperature — I2C0 SDA=GPIO8 SCL=GPIO9 @400k, addr 0x47"
+    source_file: "bmp581_minimal_example.cpp"
+    category: "example"
+    idf_versions: ["release/v5.5"]
+    build_types: ["Debug", "Release"]
+    ci_enabled: true
+    featured: true
+    hardware_required: true
+    features:
+      - "Template `hf_bmp581_examples::Bmp581EspIdfI2c` CRTP register transport (no vtable)"
+      - "Chip-id / NVM-ready init, POR-checked soft reset, OSR/ODR/IIR configuration"
+
+  bmp581_baro_demo:
+    description: "Data-ready polling at 100 Hz ODR, IIR bypass, per-second mean/RMS/span noise statistics"
+    source_file: "bmp581_baro_demo.cpp"
+    category: "example"
+    idf_versions: ["release/v5.5"]
+    build_types: ["Debug", "Release"]
+    ci_enabled: true
+    featured: true
+    hardware_required: true
+    features:
+      - "INT_STATUS data-ready gating"
+      - "Sensor-noise RMS with IIR bypassed"
+
+build_config:
+  build_types:
+    Debug:
+      description: "Debug build"
+      cmake_build_type: "Debug"
+      optimization: "-O0"
+      debug_level: "-g3"
+      defines: ["DEBUG"]
+
+    Release:
+      description: "Release build"
+      cmake_build_type: "Release"
+      optimization: "-O2"
+      debug_level: "-g0"
+      defines: ["NDEBUG"]
+
+  build_directory_pattern: "build-app-{app_type}-type-{build_type}-target-{target}-idf-{idf_version}"
+  project_name_pattern: "esp32_bmp581_{app_type}_app"
+
+ci_config:
+  timeout_minutes: 30
+  fail_fast: false
+  exclude_combinations: []
+  special_apps: []
