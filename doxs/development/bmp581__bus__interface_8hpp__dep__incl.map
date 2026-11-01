@@ -1,0 +1,16 @@
+<map id="inc/bmp581_bus_interface.hpp" name="inc/bmp581_bus_interface.hpp">
+<area shape="rect" id="Node000001" title="CRTP register transport for the Bosch BMP581 (I2C or SPI)." alt="" coords="104,5,324,33"/>
+<area shape="rect" id="Node000002" href="$bmp581_8hpp.html" title="Umbrella header for the HF&#45;BMP581 barometric pressure sensor driver." alt="" coords="151,157,277,184"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,44,181,82,178,95,181,108,192,134,206,156,201,156,187,136,175,109,173,95,175,80,193,48"/>
+<area shape="rect" id="Node000006" href="$bmp581__driver_8hpp.html" title="Bosch BMP581 barometric pressure sensor client (I2C or SPI via CRTP bus)." alt="" coords="191,81,360,109"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="235,42,267,80,262,81,234,48"/>
+<area shape="rect" id="Node000003" href="$bmp581__baro__demo_8cpp.html" title=" " alt="" coords="5,342,191,387"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="160,193,136,211,115,234,103,260,97,289,98,342,92,341,92,289,98,259,110,231,133,207,164,190"/>
+<area shape="rect" id="Node000004" href="$bmp581__minimal__example_8cpp.html" title=" " alt="" coords="220,342,450,387"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="265,189,294,207,318,231,331,259,338,289,340,343,335,340,333,289,326,260,313,234,291,211,265,194"/>
+<area shape="rect" id="Node000005" href="$hf__bmp581__esp__i2c_8hpp.html" title="Reusable ESP&#45;IDF I2C register transport for bmp581::Driver (CRTP)." alt="" coords="124,232,304,294"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="215,198,216,233,212,231,213,202"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="169,303,125,344,122,339,164,306"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="264,302,312,342,306,341,262,307"/>
+<area shape="poly" id="edge8_Node000006_Node000002" title=" " alt="" coords="257,119,227,158,223,154,253,123"/>
+</map>

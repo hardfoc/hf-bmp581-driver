@@ -1,0 +1,20 @@
+<map id="inc/bmp581_registers.hpp" name="inc/bmp581_registers.hpp">
+<area shape="rect" id="Node000001" title="BMP581 register map, bit fields, enumerations and timing constants." alt="" coords="83,5,273,33"/>
+<area shape="rect" id="Node000002" href="$bmp581_8hpp.html" title="Umbrella header for the HF&#45;BMP581 barometric pressure sensor driver." alt="" coords="151,232,277,260"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="155,47,137,75,119,110,111,148,112,166,119,183,130,198,144,211,178,231,173,233,141,215,126,202,114,186,107,167,105,147,114,109,133,73,157,43"/>
+<area shape="rect" id="Node000006" href="$bmp581__driver_8hpp.html" title="Bosch BMP581 barometric pressure sensor client (I2C or SPI via CRTP bus)." alt="" coords="129,157,299,184"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="185,45,214,156,208,156,184,50"/>
+<area shape="rect" id="Node000007" href="$bmp581__types_8hpp.html" title="BMP581 driver types: results, configuration, samples." alt="" coords="215,81,384,109"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="212,39,280,80,275,82,213,44"/>
+<area shape="rect" id="Node000003" href="$bmp581__baro__demo_8cpp.html" title=" " alt="" coords="5,418,191,462"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="160,269,136,286,115,309,103,336,97,365,98,418,92,417,92,365,98,334,110,307,133,282,164,265"/>
+<area shape="rect" id="Node000004" href="$bmp581__minimal__example_8cpp.html" title=" " alt="" coords="220,418,450,462"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="265,264,294,282,318,306,331,334,338,364,340,419,335,416,333,365,326,336,313,310,291,286,265,270"/>
+<area shape="rect" id="Node000005" href="$hf__bmp581__esp__i2c_8hpp.html" title="Reusable ESP&#45;IDF I2C register transport for bmp581::Driver (CRTP)." alt="" coords="124,308,304,370"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="215,273,216,309,212,307,213,278"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="169,379,125,419,122,415,164,381"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="264,377,312,417,306,417,262,382"/>
+<area shape="poly" id="edge8_Node000006_Node000002" title=" " alt="" coords="215,198,217,233,211,231,213,203"/>
+<area shape="poly" id="edge10_Node000007_Node000002" title=" " alt="" coords="312,121,320,154,319,170,314,186,302,202,287,215,254,234,251,230,284,211,298,198,309,183,314,169,315,154,310,126"/>
+<area shape="poly" id="edge11_Node000007_Node000006" title=" " alt="" coords="271,121,231,158,227,154,274,117"/>
+</map>
