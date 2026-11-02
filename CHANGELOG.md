@@ -29,6 +29,10 @@ All notable changes to this project are documented in this file. The format foll
 
 ### Fixed
 
+- `cmake --install` installs the driver. It installed nothing: the package config was generated but not installed,
+  no headers were copied and no target was exported, so `find_package(hf_bmp581)` could not work. It now installs
+  every header the public headers include (`inc/*.hpp` and the generated `bmp581_version.h`) and exports the
+  documented target `hf::bmp581`. A host test installs the build tree and builds a `find_package()` consumer.
 - `SoftReset()` works over I2C. The chip does not acknowledge the write of 0xB6 to CMD (datasheet section 7.36), so
   every I2C port that reported the missing ACK made `SoftReset()` return `Bus`, and `Init()` skipped its recovery
   reset for a part whose NVM boot had not finished. The driver now accepts the failed status of that one write

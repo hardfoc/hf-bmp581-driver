@@ -35,6 +35,21 @@ folder with the generated `bmp581_version.h`, and requires C++17 (`cxx_std_17`).
 | `HF_BMP581_ENABLE_WARNINGS` | `OFF` | `-Wall -Wextra -Wpedantic` on targets that link the driver |
 | `HF_BMP581_BUILD_TESTS` | `OFF` | Builds the host unit tests and the documentation snippets ([Testing and CI](testing.md)) |
 
+To use an installed copy instead, install it once and find the package:
+
+```bash
+cmake -S external/hf-bmp581-driver -B build-bmp581
+cmake --install build-bmp581 --prefix /opt/hf
+```
+
+```cmake
+find_package(hf_bmp581 CONFIG REQUIRED)        # with /opt/hf on CMAKE_PREFIX_PATH
+target_link_libraries(my_app PRIVATE hf::bmp581)
+```
+
+`cmake --install` copies the headers of `inc/` and the generated `bmp581_version.h` into `include/`, and the package
+files into `lib/cmake/hf_bmp581/`. The installed target has the same name, `hf::bmp581`.
+
 Without `add_subdirectory`, include the settings file and use its variables:
 
 ```cmake
@@ -56,7 +71,7 @@ the example I2C port uses.
 | Layer | File | Role |
 | --- | --- | --- |
 | Settings | [`cmake/hf_bmp581_build_settings.cmake`](../cmake/hf_bmp581_build_settings.cmake) | Target name, include directories, version: the single source of truth |
-| Library | [`CMakeLists.txt`](../CMakeLists.txt) | `INTERFACE` target and package version files |
+| Library | [`CMakeLists.txt`](../CMakeLists.txt) | `INTERFACE` target, install rules and package files |
 | ESP-IDF | [`examples/esp32/components/hf_bmp581/CMakeLists.txt`](../examples/esp32/components/hf_bmp581/CMakeLists.txt) | IDF component wrapper over the same settings |
 
 | Variable | Value |

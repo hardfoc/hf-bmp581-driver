@@ -31,7 +31,10 @@ ctest --test-dir build-host --output-on-failure
 | `TestIntConfigFields` | INT_CONFIG field masks tile the register (`pad_int_drv` is bits 7:4); `ConfigureInterrupt()` keeps the pad drive bits |
 | `TestNvm` | The NVM read sequence and address checks |
 
-All tests are in [`tests/host/bmp581_driver_test.cpp`](../tests/host/bmp581_driver_test.cpp).
+All tests are in [`tests/host/bmp581_driver_test.cpp`](../tests/host/bmp581_driver_test.cpp). A second ctest,
+`hf_bmp581_install_consumer` ([`tests/install_consumer.cmake`](../tests/install_consumer.cmake)), runs
+`cmake --install` into the build tree and builds a `find_package(hf_bmp581)` consumer that links `hf::bmp581`
+and includes every public header from the installed copy.
 
 ## Documentation snippets
 
