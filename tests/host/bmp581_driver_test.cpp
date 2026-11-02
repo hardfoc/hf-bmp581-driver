@@ -21,8 +21,8 @@ int g_failures = 0;
     } while (0)
 
 /// Register-map fake of the chip on its bus: writes land in regs[], reads come from regs[]; CMD is
-/// intercepted to emulate soft reset and NVM read enable. It also models what the datasheet says the
-/// bus does around a soft reset:
+/// intercepted to emulate soft reset and NVM read enable. It also models what the datasheet says
+/// the bus does around a soft reset:
 ///  - I2C wiring (`spi_wired == false`): the write of 0xB6 to CMD is not acknowledged, so the
 ///    adapter reports it as failed (section 7.36), though the reset happens.
 ///  - SPI wiring: the chip starts in I2C mode and returns to it after a soft reset; the first SPI
@@ -107,7 +107,8 @@ private:
         ++reset_count;
         busy_us = bmp581::timing::kSoftResetUs;
         spi_selected = false;
-        regs[bmp581::reg::kIntStatus] = por_after_reset ? bmp581::int_status::kPorSoftResetComplete : 0;
+        regs[bmp581::reg::kIntStatus] =
+            por_after_reset ? bmp581::int_status::kPorSoftResetComplete : 0;
         regs[bmp581::reg::kOdrConfig] = bmp581::odr_config::kDeepDisableMask;
         if (status_after_reset != 0xFF) {
             regs[bmp581::reg::kStatus] = status_after_reset;
@@ -392,8 +393,9 @@ void TestIntConfigFields() {
     namespace ic = bmp581::int_config;
     CHECK(ic::kPadDriveMask == 0xF0);
     CHECK((ic::kPadDriveMask >> ic::kPadDriveShift) == 0x0F);
-    CHECK((ic::kModeMask | ic::kPolMask | ic::kOdMask | ic::kEnableMask | ic::kPadDriveMask) == 0xFF);
-    CHECK((ic::kPadDriveMask & (ic::kModeMask | ic::kPolMask | ic::kOdMask | ic::kEnableMask)) == 0);
+    constexpr uint8_t kLowFields = ic::kModeMask | ic::kPolMask | ic::kOdMask | ic::kEnableMask;
+    CHECK((kLowFields | ic::kPadDriveMask) == 0xFF);
+    CHECK((ic::kPadDriveMask & kLowFields) == 0);
 
     // ConfigureInterrupt() leaves the whole pad_int_drv field as it found it.
     FakeBus bus;

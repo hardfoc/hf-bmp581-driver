@@ -2,6 +2,9 @@
  * @file main.cpp
  * @brief Compiles every public header from an installed copy of the driver.
  */
+#include <cstddef>
+#include <cstdint>
+
 #include "bmp581.hpp"
 #include "bmp581_bus_interface.hpp"
 #include "bmp581_driver.hpp"
@@ -9,11 +12,8 @@
 #include "bmp581_types.hpp"
 #include "bmp581_version.h"
 
-#include <cstddef>
-#include <cstdint>
-
 class InstalledPort : public bmp581::BusInterface<InstalledPort> {
- public:
+public:
   bool WriteRegs(uint8_t reg, const uint8_t* data, std::size_t len) noexcept {
     (void)reg;
     (void)data;

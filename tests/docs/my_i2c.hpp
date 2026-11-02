@@ -25,7 +25,7 @@ public:
   // 7-bit address: 0x46 with SDO low, 0x47 with SDO high.
   explicit MyI2c(uint8_t address = bmp581::addr::kSecondary) noexcept : address_(address) {}
 
-  // Tells the driver no SPI dummy read is needed. It also accepts the soft-reset command's missing ACK.
+  // Tells the driver no SPI dummy read is needed and the soft-reset command's missing ACK is expected.
   static constexpr bmp581::Interface kInterface = bmp581::Interface::I2c;
 
   // One transaction: [reg, data...]. The chip increments the register address after each byte.
