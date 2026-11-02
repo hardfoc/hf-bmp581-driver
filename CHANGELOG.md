@@ -32,6 +32,10 @@ All notable changes to this project are documented in this file. The format foll
 
 ### Fixed
 
+- Bus errors the driver dropped now reach the caller as `Bus`: the INT_STATUS read in `ConfigureInterrupt()`, the
+  FIFO_SEL / OSR / DSP reads with which `GetPowerMode()` (and every call built on it) tells deep standby from
+  standby, and the mode restore at the end of `ReadNvm()`. The port's `WriteRegs()` / `ReadRegs()` already return
+  `bool`; no port change is needed.
 - `cmake --install` installs the driver. It installed nothing: the package config was generated but not installed,
   no headers were copied and no target was exported, so `find_package(hf_bmp581)` could not work. It now installs
   every header the public headers include (`inc/*.hpp` and the generated `bmp581_version.h`) and exports the

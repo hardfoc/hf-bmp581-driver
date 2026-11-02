@@ -43,6 +43,9 @@ public:
     bool spi_wired{false};              // false: I2C bus; true: SPI bus (I2C mode until selected)
     bool spi_selected{false};           // SPI wiring: interface currently in SPI mode
     bool reads_fail_after_reset{false}; // every read after a soft reset reports a bus error
+    int fail_read_reg{-1};              // reads starting at this register report a bus error
+    int fail_write_reg{-1};             // writes starting at this register report a bus error ...
+    int fail_write_skip{0};             // ... after this many of them succeeded
     uint32_t busy_us{0};                // time left until the chip answers again after a reset
     int reset_count{0};
     int invalid_reads{0};               // reads answered with invalid data (SPI not selected)
@@ -59,6 +62,7 @@ public:
 
     bool WriteRegs(uint8_t reg, const uint8_t* data, std::size_t len) noexcept {
         if (fail_bus || busy_us > 0) return false;
+        if (reg == fail_write_reg && fail_write_skip-- <= 0) return false;
         if (spi_wired && !spi_selected) {
             spi_selected = true;  // this transaction selected SPI; its content is lost
             return true;
@@ -79,7 +83,7 @@ public:
         return acked;
     }
     bool ReadRegs(uint8_t reg, uint8_t* out, std::size_t len) noexcept {
-        if (fail_bus || busy_us > 0) return false;
+        if (fail_bus || busy_us > 0 || reg == fail_read_reg) return false;
         if (reset_count > 0) {
             ++reads_after_reset;
             if (reads_fail_after_reset) return false;
@@ -300,6 +304,37 @@ void TestInitColdNvmOverI2c() {
     CHECK(bus.delayed_us >= bmp581::timing::kSoftResetUs);
 }
 
+// Reads the driver used to drop: their bus errors reach the caller.
+void TestDroppedReadsPropagate() {
+    {
+        FakeBus bus;
+        bus.fail_read_reg = bmp581::reg::kIntStatus;
+        bmp581::Driver<FakeBus> dev(bus);
+        CHECK(dev.ConfigureInterrupt(bmp581::InterruptConfig{}).error == bmp581::DriverError::Bus);
+    }
+    {
+        FakeBus bus;  // standby with deep_dis = 0: the driver reads FIFO_SEL, OSR/ODR and DSP
+        bus.regs[bmp581::reg::kOdrConfig] = 0x00;
+        bus.fail_read_reg = bmp581::reg::kFifoSel;
+        bmp581::Driver<FakeBus> dev(bus);
+        CHECK(dev.GetPowerMode().error == bmp581::DriverError::Bus);
+        bus.fail_read_reg = bmp581::reg::kDspConfig;
+        CHECK(dev.GetPowerMode().error == bmp581::DriverError::Bus);
+        bus.fail_read_reg = -1;
+        bus.regs[bmp581::reg::kOdrConfig] = static_cast<uint8_t>(0x1C << 2);  // 1 Hz, deep standby
+        const auto m = dev.GetPowerMode();
+        CHECK(m.ok() && m.value == bmp581::PowerMode::DeepStandby);
+    }
+    {
+        FakeBus bus;  // ReadNvm() from normal mode must report a failed mode restore
+        bus.regs[bmp581::reg::kOdrConfig] = 0x81;
+        bmp581::Driver<FakeBus> dev(bus);
+        bus.fail_write_reg = bmp581::reg::kOdrConfig;
+        bus.fail_write_skip = 1;  // the hop to standby succeeds, the restore to normal fails
+        CHECK(dev.ReadNvm(0x21).error == bmp581::DriverError::Bus);
+    }
+}
+
 void TestPowerModes() {
     FakeBus bus;
     bmp581::Driver<FakeBus> dev(bus);
@@ -442,6 +477,7 @@ int main() {
     TestSoftResetBusErrors();
     TestSoftResetSpiReentry();
     TestInitColdNvmOverI2c();
+    TestDroppedReadsPropagate();
     TestPowerModes();
     TestOsrOdrIir();
     TestInterruptsAndSample();

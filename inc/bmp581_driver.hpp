@@ -156,8 +156,10 @@ public:
         const uint8_t mode = odr & odr_config::kPowerModeMask;
         if (mode == static_cast<uint8_t>(PowerMode::Standby)) {
             const bool deep_disabled = (odr & odr_config::kDeepDisableMask) != 0U;
-            return DriverResult<PowerMode>::success(deep_disabled ? PowerMode::Standby
-                                                                  : DeepStandbyOrStandby());
+            if (deep_disabled) {
+                return DriverResult<PowerMode>::success(PowerMode::Standby);
+            }
+            return DeepStandbyOrStandby();
         }
         return DriverResult<PowerMode>::success(static_cast<PowerMode>(mode));
     }
@@ -314,7 +316,9 @@ public:
             return DriverResult<void>::failure(DriverError::Bus);
         }
         uint8_t st = 0;
-        (void)bus_.ReadRegs(reg::kIntStatus, &st, 1);
+        if (!bus_.ReadRegs(reg::kIntStatus, &st, 1)) {  // clears pending status
+            return DriverResult<void>::failure(DriverError::Bus);
+        }
         cfg = static_cast<uint8_t>((cfg & ~(int_config::kModeMask | int_config::kPolMask | int_config::kOdMask |
                                             int_config::kEnableMask)) |
                                    (c.mode == IntMode::Latched ? int_config::kModeMask : 0U) |
@@ -415,7 +419,8 @@ public:
             return DriverResult<uint16_t>::failure(DriverError::Bus);
         }
         if (cur.value != PowerMode::Standby) {
-            (void)SetPowerMode(cur.value);
+            const auto r = SetPowerMode(cur.value);
+            if (!r.ok()) return DriverResult<uint16_t>::failure(r.error);
         }
         return DriverResult<uint16_t>::success(static_cast<uint16_t>((d[1] << 8) | d[0]));
     }
@@ -483,17 +488,22 @@ private:
     }
 
     /// Bosch API: deep standby is only entered when ODR ≤ 5 Hz, FIFO off and IIR bypassed.
-    PowerMode DeepStandbyOrStandby() noexcept {
+    /// A failed read is reported as `Bus` instead of being taken as "not deep standby".
+    DriverResult<PowerMode> DeepStandbyOrStandby() noexcept {
         uint8_t fifo_sel = 0;
-        (void)bus_.ReadRegs(reg::kFifoSel, &fifo_sel, 1);
+        if (!bus_.ReadRegs(reg::kFifoSel, &fifo_sel, 1)) {
+            return DriverResult<PowerMode>::failure(DriverError::Bus);
+        }
         const auto osr = GetOsrOdr();
+        if (!osr.ok()) return DriverResult<PowerMode>::failure(osr.error);
         const auto iir = GetIir();
-        if (osr.ok() && iir.ok() && (fifo_sel & 0x03U) == 0U &&
+        if (!iir.ok()) return DriverResult<PowerMode>::failure(iir.error);
+        if ((fifo_sel & 0x03U) == 0U &&
             static_cast<uint8_t>(osr.value.odr) > static_cast<uint8_t>(Odr::Hz5) &&
             iir.value.temperature == IirFilter::Bypass && iir.value.pressure == IirFilter::Bypass) {
-            return PowerMode::DeepStandby;
+            return DriverResult<PowerMode>::success(PowerMode::DeepStandby);
         }
-        return PowerMode::Standby;
+        return DriverResult<PowerMode>::success(PowerMode::Standby);
     }
 
     DriverError NvmReadyCheck() noexcept {

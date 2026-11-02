@@ -25,6 +25,7 @@ ctest --test-dir build-host --output-on-failure
 | `TestSoftResetBusErrors` | A failed read after the reset, a dead bus, and a failed reset write on SPI are reported as `Bus` |
 | `TestSoftResetSpiReentry` | SPI wiring: the fake returns to I2C mode after the reset and answers the first read with invalid data; the driver's dummy read selects SPI again |
 | `TestInitColdNvmOverI2c` | `Init()`'s recovery reset runs even though the reset command is not acknowledged |
+| `TestDroppedReadsPropagate` | Bus errors in `ConfigureInterrupt()`'s INT_STATUS read, `GetPowerMode()`'s deep-standby reads and `ReadNvm()`'s mode restore are returned as `Bus` |
 | `TestPowerModes` | The standby hop and its delay, deep standby |
 | `TestOsrOdrIir` | Bit packing of OSR_CONFIG, ODR_CONFIG, DSP_CONFIG and DSP_IIR; mode restore after `SetIir()` |
 | `TestInterruptsAndSample` | INT_CONFIG and INT_SOURCE packing, data-ready, 24-bit decoding (101325 Pa as `0x62F340`) |
