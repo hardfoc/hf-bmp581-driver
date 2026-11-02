@@ -5,7 +5,8 @@ oversampling and data-rate pairs work.
 
 Values come from the [datasheet](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmp581-ds004.pdf)
 (BST-BMP581-DS004, revision 1.13, chapter 7) and the Bosch BMP5 Sensor API v1.1.1. Every address and mask below is
-a constant in [`inc/bmp581_registers.hpp`](../inc/bmp581_registers.hpp).
+a constant in [`inc/bmp581_registers.hpp`](../inc/bmp581_registers.hpp): `reg::kChipId` for `CHIP_ID`,
+`int_status::kDataReady` for its bit 0, and so on.
 
 ## Register map
 
@@ -14,24 +15,24 @@ address.
 
 <div class="hf-registers" markdown>
 
-| Address | Name | Reset | Contents | Driver constant |
-| --- | --- | --- | --- | --- |
-| `0x01` | `CHIP_ID` | `0x50` | Chip identifier | `reg::kChipId` |
-| `0x02` | `REV_ID` | `0x32` | ASIC revision | `reg::kRevId` |
-| `0x14` | `INT_CONFIG` | `0x35` | `int_mode` 0, `int_pol` 1, `int_od` 2, `int_en` 3, `pad_int_drv` 7:4 | `reg::kIntConfig` |
-| `0x15` | `INT_SOURCE` | `0x00` | `drdy_data_reg_en` 0, `fifo_full_en` 1, `fifo_ths_en` 2, `oor_p_en` 3 | `reg::kIntSource` |
-| `0x1D`–`0x1F` | `TEMP_DATA` | `0x7F` | Temperature, 24-bit two's complement, XLSB first | `reg::kTempDataXlsb` |
-| `0x20`–`0x22` | `PRESS_DATA` | `0x7F` | Pressure, 24-bit unsigned, XLSB first | `reg::kPressDataXlsb` |
-| `0x27` | `INT_STATUS` | `0x00` | `drdy_data_reg` 0, `fifo_full` 1, `fifo_ths` 2, `oor_p` 3, `por` 4; clear on read | `reg::kIntStatus` |
-| `0x28` | `STATUS` | `0x02` | `status_core_rdy` 0, `status_nvm_rdy` 1, `status_nvm_err` 2, `status_nvm_cmd_err` 3 | `reg::kStatus` |
-| `0x2B` | `NVM_ADDR` | `0x00` | `nvm_row_address` 5:0, `nvm_prog_en` 6 | `reg::kNvmAddr` |
-| `0x2C`, `0x2D` | `NVM_DATA_LSB`, `_MSB` | `0x00` | One 16-bit NVM word | `reg::kNvmDataLsb` |
-| `0x30` | `DSP_CONFIG` | `0x03` | `iir_flush_forced_en` 2, `shdw_sel_iir_t` 3, `shdw_sel_iir_p` 5 | `reg::kDspConfig` |
-| `0x31` | `DSP_IIR` | `0x00` | `set_iir_t` 2:0, `set_iir_p` 5:3 | `reg::kDspIir` |
-| `0x36` | `OSR_CONFIG` | `0x00` | `osr_t` 2:0, `osr_p` 5:3, `press_en` 6 | `reg::kOsrConfig` |
-| `0x37` | `ODR_CONFIG` | `0x70` | `pwr_mode` 1:0, `odr` 6:2, `deep_dis` 7 | `reg::kOdrConfig` |
-| `0x38` | `OSR_EFF` | `0x00` | `osr_t_eff` 2:0, `osr_p_eff` 5:3, `odr_is_valid` 7 | `reg::kOsrEff` |
-| `0x7E` | `CMD` | `0x00` | `0xB6` soft reset; `0x5D` then `0xA5` NVM read | `reg::kCmd` |
+| Address | Name | Reset | Contents |
+| --- | --- | --- | --- |
+| `0x01` | `CHIP_ID` | `0x50` | Chip identifier |
+| `0x02` | `REV_ID` | `0x32` | ASIC revision |
+| `0x14` | `INT_CONFIG` | `0x35` | `int_mode` 0, `int_pol` 1, `int_od` 2, `int_en` 3, `pad_int_drv` 7:4 |
+| `0x15` | `INT_SOURCE` | `0x00` | `drdy_data_reg_en` 0, `fifo_full_en` 1, `fifo_ths_en` 2, `oor_p_en` 3 |
+| `0x1D`–`0x1F` | `TEMP_DATA` | `0x7F` | Temperature, 24-bit two's complement, XLSB first |
+| `0x20`–`0x22` | `PRESS_DATA` | `0x7F` | Pressure, 24-bit unsigned, XLSB first |
+| `0x27` | `INT_STATUS` | `0x00` | `drdy_data_reg` 0, `fifo_full` 1, `fifo_ths` 2, `oor_p` 3, `por` 4; clear on read |
+| `0x28` | `STATUS` | `0x02` | `status_core_rdy` 0, `status_nvm_rdy` 1, `status_nvm_err` 2, `status_nvm_cmd_err` 3 |
+| `0x2B` | `NVM_ADDR` | `0x00` | `nvm_row_address` 5:0, `nvm_prog_en` 6 |
+| `0x2C`, `0x2D` | `NVM_DATA_LSB`, `_MSB` | `0x00` | One 16-bit NVM word |
+| `0x30` | `DSP_CONFIG` | `0x03` | `iir_flush_forced_en` 2, `shdw_sel_iir_t` 3, `shdw_sel_iir_p` 5 |
+| `0x31` | `DSP_IIR` | `0x00` | `set_iir_t` 2:0, `set_iir_p` 5:3 |
+| `0x36` | `OSR_CONFIG` | `0x00` | `osr_t` 2:0, `osr_p` 5:3, `press_en` 6 |
+| `0x37` | `ODR_CONFIG` | `0x70` | `pwr_mode` 1:0, `odr` 6:2, `deep_dis` 7 |
+| `0x38` | `OSR_EFF` | `0x00` | `osr_t_eff` 2:0, `osr_p_eff` 5:3, `odr_is_valid` 7 |
+| `0x7E` | `CMD` | `0x00` | `0xB6` soft reset; `0x5D` then `0xA5` NVM read |
 
 </div>
 
@@ -41,15 +42,18 @@ address.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> DeepStandby: power-up or soft reset
-    DeepStandby --> Standby: deep_dis = 1, or a setting deep standby does not allow
-    Standby --> Normal: pwr_mode = 01
-    Standby --> Forced: pwr_mode = 10
-    Standby --> Continuous: pwr_mode = 11
-    Normal --> Standby: pwr_mode = 00, t_standby
-    Continuous --> Standby: pwr_mode = 00, t_standby
-    Forced --> Standby: after one conversion
+    [*] --> DeepStandby: reset
+    DeepStandby --> Standby: deep_dis = 1
+    Standby --> Normal: 01
+    Standby --> Forced: 10
+    Standby --> Continuous: 11
+    Normal --> Standby: 00
+    Continuous --> Standby: 00
+    Forced --> Standby: done
 ```
+
+The labels are the values written to `ODR_CONFIG.pwr_mode`; every transition into standby takes up to t_standby
+(2.5 ms). Changing any setting deep standby does not allow also moves the chip from deep standby to standby.
 
 | Mode | `PowerMode` | What the chip does |
 | --- | --- | --- |

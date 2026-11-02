@@ -9,17 +9,16 @@ All values here come from the Bosch [BMP581 datasheet](https://www.bosch-sensort
 
 The sensor is a 10-pin LGA with pin 1 marked on the lid (datasheet section 6.1, Table 28).
 
-| Pin | Name | Direction (chip) | I2C | SPI 4-wire | SPI 3-wire |
-| --- | --- | --- | --- | --- | --- |
-| 1 | VDDIO | supply | I/O supply | I/O supply | I/O supply |
-| 2 | SCK | in | SCL | SCK | SCK |
-| 3 | VSS | supply | GND | GND | GND |
-| 4 | SDI | in / out | SDA | MOSI (SDI) | SDI / SDO |
-| 5 | SDO | in / out | Address bit: GND 0x46, VDDIO 0x47 | MISO (SDO) | Leave floating |
-| 6 | CSB | in | Tie to VDDIO | Chip select, active low | Chip select, active low |
-| 7 | INT | out | Interrupt, or GND if unused | same | same |
-| 8, 9 | VSS | supply | GND | GND | GND |
-| 10 | VDD | supply | Analog supply | Analog supply | Analog supply |
+| Pin | Name | I2C | SPI |
+| --- | --- | --- | --- |
+| 1 | VDDIO | I/O supply | I/O supply |
+| 2 | SCK | SCL | SCK |
+| 3, 8, 9 | VSS | GND | GND |
+| 4 | SDI | SDA | MOSI; data in and out in 3-wire mode |
+| 5 | SDO | Address: GND 0x46, VDDIO 0x47 | MISO; leave floating in 3-wire mode |
+| 6 | CSB | Tie to VDDIO | Chip select, active low |
+| 7 | INT | Interrupt output | Interrupt output |
+| 10 | VDD | Analog supply | Analog supply |
 
 If you do not use INT, connect it to GND and leave the interrupt disabled (the reset state of `INT_CONFIG.int_en`
 is 0).

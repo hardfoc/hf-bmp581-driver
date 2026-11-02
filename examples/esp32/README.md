@@ -21,26 +21,25 @@ and `generate_matrix.py` (same layout as other `hf-*-driver` submodules).
 
 ## Default wiring (ESP32-S3)
 
-| MCU signal | GPIO (default) | Sensor |
-|------------|----------------|--------|
-| SDA        | **8**          | SDA    |
-| SCL        | **9**          | SCL    |
-| 3V3        | VDD / VDDIO    | 1.71–3.6 V |
-| GND        | GND            | GND    |
+| ESP32-S3 | BMP581 | Notes |
+| --- | --- | --- |
+| GPIO 8 | SDI (SDA) | Pull-up to 3.3 V |
+| GPIO 9 | SCK (SCL) | Pull-up to 3.3 V |
+| 3.3 V | VDD, VDDIO, CSB, SDO | CSB high keeps I2C; SDO high selects address 0x47 |
+| GND | VSS | |
 
-Breakouts (SparkFun SEN-20170, Adafruit 6407) include pull-ups and default to
-0x47. Change the `using Bus = Bmp581EspIdfI2c<...>` alias to move pins, address
-or speed.
+Breakout boards such as the SparkFun SEN-20170 carry the pull-ups and default to 0x47. Change the
+`using Bus = Bmp581EspIdfI2c<...>` alias to move pins, address or speed.
 
 ## Apps (`app_config.yml`)
 
 | App | Role |
-|-----|------|
+| --- | --- |
 | `bmp581_minimal_example` | init, reset, barometric preset, 1 Hz print |
 | `bmp581_baro_demo` | data-ready polling at 100 Hz, IIR bypass, noise statistics |
 
 ```bash
 ./scripts/build_app.sh list
 ./scripts/build_app.sh bmp581_minimal_example Debug
-./scripts/flash_app.sh bmp581_minimal_example Debug
+./scripts/flash_app.sh flash_monitor bmp581_minimal_example Debug
 ```

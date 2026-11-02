@@ -51,7 +51,7 @@ Driver uses
 :   Register access over I2C or SPI; data-ready polling or the INT pin. FIFO and out-of-range detection are not
     wrapped
 
-[Datasheet (BST-BMP581-DS004)](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmp581-ds004.pdf) ·
+[Datasheet](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmp581-ds004.pdf) ·
 [Product page](https://www.bosch-sensortec.com/products/environmental-sensors/pressure-sensors/bmp581/) ·
 [Bosch BMP5 Sensor API](https://github.com/boschsensortec/BMP5_SensorAPI)
 </div>
