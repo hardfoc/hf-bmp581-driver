@@ -11,6 +11,9 @@ All notable changes to this project are documented in this file. The format foll
   the driver which bus it drives; `bmp581::kBusInterface<Bus>` reads it. Without it the driver accepts the
   soft-reset command's missing ACK and does the SPI dummy read, which is correct on either bus. The documented
   I2C and SPI ports and the ESP32 I2C port declare it and no longer special-case the reset command.
+- ESP32 SPI port `hf_bmp581_examples::Bmp581EspIdfSpi` on the ESP-IDF `spi_master` driver (read bit 0x80, one
+  address byte per written byte, mode 0 or 3, at most 12 MHz, `kInterface = Interface::Spi`) and the
+  `bmp581_spi_example` app, built in CI.
 
 ### Changed
 
@@ -57,3 +60,5 @@ All notable changes to this project are documented in this file. The format foll
 - `Init()` soft-resets once and checks again when STATUS reads 0 with a valid chip id.
 - `BarometricReferencePreset()` (100 Hz, pressure OSR ×8, IIR 3).
 - Host unit tests against a register-map fake; ESP32-S3 examples `bmp581_minimal_example` and `bmp581_baro_demo`.
+
+<!-- markdownlint-configure-file {"MD024": {"siblings_only": true}} -->

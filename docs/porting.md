@@ -91,7 +91,9 @@ Rules the transfer must follow:
 
 The ESP32 examples use [`hf_bmp581_esp_i2c.hpp`](../examples/esp32/main/include/hf_bmp581_esp_i2c.hpp):
 `Bmp581EspIdfI2c<port, sda, scl, address, speed>`, an I2C port on the legacy ESP-IDF `driver/i2c.h` API with
-FreeRTOS delays. Start from it for any ESP-IDF target.
+FreeRTOS delays. [`hf_bmp581_esp_spi.hpp`](../examples/esp32/main/include/hf_bmp581_esp_spi.hpp) is the SPI
+counterpart, `Bmp581EspIdfSpi<host, mosi, miso, sclk, cs, clock, mode>` on the ESP-IDF `spi_master` driver (mode 0
+or 3, at most 12 MHz, checked at compile time). Start from one of them for any ESP-IDF target.
 
 ## Check your port
 
