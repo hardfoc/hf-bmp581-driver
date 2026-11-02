@@ -1,90 +1,107 @@
-# HF-BMP581 Driver
+# BMP581 Driver
 
-**Header-only C++17 driver for the Bosch BMP581 barometric pressure sensor**:
-chip-id / NVM-ready init, POR-checked soft reset, power modes with the mandatory
-standby hop, OSR / ODR, IIR (standby-only write with mode restore), interrupt pin
-and source configuration, data-ready polling, 24-bit pressure (1/64 Pa) and
-temperature (1/65536 °C), NVM user-word read. Register sequences ported from the
-Bosch BMP5 Sensor API (BSD-3).
+A header-only C++17 driver for the Bosch BMP581 barometric pressure sensor: configure oversampling, data rate, IIR
+filter and power mode, and read pressure and temperature, from any MCU with I2C or SPI.
 
-[![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/hardfoc/hf-bmp581-driver/actions/workflows/esp32-examples-build-ci.yml/badge.svg?branch=main)](https://github.com/hardfoc/hf-bmp581-driver/actions/workflows/esp32-examples-build-ci.yml)
-[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://hardfoc.github.io/hf-bmp581-driver/)
+[![Host tests](https://github.com/hardfoc/hf-bmp581-driver/actions/workflows/ci-host-tests.yml/badge.svg?branch=main)](https://github.com/hardfoc/hf-bmp581-driver/actions/workflows/ci-host-tests.yml)
+[![ESP32 examples](https://github.com/hardfoc/hf-bmp581-driver/actions/workflows/esp32-examples-build-ci.yml/badge.svg?branch=main)](https://github.com/hardfoc/hf-bmp581-driver/actions/workflows/esp32-examples-build-ci.yml)
+[![Docs](https://github.com/hardfoc/hf-bmp581-driver/actions/workflows/ci-docs-publish.yml/badge.svg?branch=main)](https://hardfoc.github.io/hf-bmp581-driver/)
+[![License: MIT](https://img.shields.io/github/license/hardfoc/hf-bmp581-driver)](LICENSE)
 
-## Table of contents
+**Documentation: <https://hardfoc.github.io/hf-bmp581-driver/>**
 
-1. [Overview](#overview)
-2. [Features](#features)
-3. [Quick start](#quick-start)
-4. [Documentation](#documentation)
-5. [Examples](#examples)
-6. [Official references](#official-references)
-7. [License](#license)
+<!-- figure: driver-layers -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/driver-layers.dark.svg">
+  <img src="docs/diagrams/driver-layers.svg"
+    alt="Layer diagram: the application calls the hardware-agnostic BMP581 driver, which reads and writes
+    registers through the CRTP register transport, which calls the platform port you write, which drives
+    the I2C or SPI bus of the BMP581.">
+</picture>
+<!-- /figure -->
 
-## Overview
+## In 30 seconds
 
-> **[Live documentation (GitHub Pages)](https://hardfoc.github.io/hf-bmp581-driver/)** —
-> Installation, register interface, CMake, API summary, and troubleshooting.
+Write a small port class for your MCU (register read, register write, a delay;
+[Porting](https://hardfoc.github.io/hf-bmp581-driver/latest/porting/)), then:
 
-The driver targets an **absolute-pressure reference** in host firmware (density
-compensation, gauge → absolute conversion, altitude). The BMP581 offers ±30 Pa
-typical absolute accuracy, 0.08 Pa RMS noise and up to 240 Hz ODR; a
-`BarometricReferencePreset()` (100 Hz, OSR ×8, IIR 3) is provided. One CRTP
-register transport shape serves both I2C and SPI. FIFO and out-of-range
-features are intentionally not ported.
-
-## Features
-
-- **CRTP** `bmp581::BusInterface<Derived>` — no virtual calls; you provide
-  `WriteRegs` / `ReadRegs` / `DelayUs` / `EnsureInitialized`.
-- **`bmp581::Driver<BusT>`** — `Init`, `SoftReset`, `Configure`, `Set/GetPowerMode`,
-  `Set/GetOsrOdr`, `GetEffectiveOsr`, `Set/GetIir`, `ConfigureInterrupt`,
-  `SelectInterruptSources`, `DataReady`, `ReadSample`, `ReadNvm`, raw register access.
-- **Typed results** — `DriverResult<T>` with stable `DriverError` codes.
-- **Complete register map** with bit-field masks and `OdrHz()` helper.
-- **No heap allocation**; fits FreeRTOS / bare metal.
-- **Host tests** (`-DHF_BMP581_BUILD_TESTS=ON`) against a register-map fake;
-  **ESP32-S3** examples.
-
-## Quick start
-
-```cmake
-add_subdirectory(/path/to/hf-bmp581-driver)
-target_link_libraries(your_target PRIVATE hf::bmp581)
-```
-
+<!-- generated: quickstart-code -->
 ```cpp
 #include "bmp581.hpp"
 
-MyBus bus;                                   // inherits bmp581::BusInterface<MyBus>
-bmp581::Driver<MyBus> dev(bus);
-dev.Init();
-dev.SoftReset();
-dev.Configure(bmp581::BarometricReferencePreset());
-auto s = dev.ReadSample();                   // s.value.pressure_pa, s.value.temperature_c
+#include <cstdio>
+
+int read_pressure_once(MyI2c& bus) {
+  bmp581::Driver<MyI2c> dev(bus);
+
+  if (const auto r = dev.Init(); !r) {                       // 1. chip id and NVM ready
+    std::printf("init: %s\n", bmp581::ToString(r.error).data());
+    return -1;                                               // wiring, address or supply
+  }
+  if (!dev.Configure(bmp581::BarometricReferencePreset())) { // 2. 100 Hz, OSR x8, IIR 3, normal mode
+    return -1;
+  }
+  for (int i = 0; i < 50; ++i) {                             // 3. wait for the first conversion
+    const auto ready = dev.DataReady();
+    if (!ready || ready.value) break;
+    bus.DelayUs(1000);
+  }
+  const auto s = dev.ReadSample();                           // 4. pressure (Pa) and temperature (C)
+  if (!s) return -1;
+  std::printf("%.1f Pa  %.2f C\n", static_cast<double>(s.value.pressure_pa),
+              static_cast<double>(s.value.temperature_c));
+  return 0;
+}
 ```
+<!-- /generated -->
+
+## What it does
+
+- Checks the chip on start-up: chip id, NVM loaded, and one soft-reset retry for a part whose NVM boot stalled.
+- Sets oversampling, output data rate, IIR filter and power mode in the order the datasheet requires, with the
+  standby hop before every mode change and IIR writes in standby.
+- Reads pressure (1/64 Pa) and temperature (1/65536 °C) in one burst, with data-ready polling or the INT pin.
+- Reads the three NVM user words; raw register access for the FIFO and out-of-range detection.
+- Returns `DriverResult<T>` with stable error codes. No heap, no exceptions, no RTOS, no virtual calls (the port is
+  a CRTP class).
+
+## Install
+
+```bash
+git submodule add https://github.com/hardfoc/hf-bmp581-driver.git external/hf-bmp581-driver
+```
+
+```cmake
+add_subdirectory(external/hf-bmp581-driver)
+target_link_libraries(my_app PRIVATE hf::bmp581)
+```
+
+ESP-IDF: use the component wrapper in [`examples/esp32/components/hf_bmp581`](examples/esp32/components/hf_bmp581/CMakeLists.txt).
+Details: [Installation](https://hardfoc.github.io/hf-bmp581-driver/latest/installation/).
 
 ## Documentation
 
-- [Installation](docs/installation.md) · [Quick start](docs/quickstart.md) ·
-  [Register interface](docs/register_interface.md) · [Hardware setup](docs/hardware_setup.md) ·
-  [CMake integration](docs/cmake_integration.md) · [API reference](docs/api_reference.md) ·
-  [Examples](docs/examples.md) · [Troubleshooting](docs/troubleshooting.md) ·
-  [Datasheets](docs/datasheet/README.md)
+| | |
+| --- | --- |
+| [Quickstart](https://hardfoc.github.io/hf-bmp581-driver/latest/quickstart/) | Wire it, write the port, read pressure |
+| [Hardware](https://hardfoc.github.io/hf-bmp581-driver/latest/hardware/) | Pins, interface selection, bus settings, timing |
+| [API guide](https://hardfoc.github.io/hf-bmp581-driver/latest/api-guide/) | Initialise, configure, read, handle errors |
+| [Register interface](https://hardfoc.github.io/hf-bmp581-driver/latest/register-interface/) | Registers, power modes, oversampling limits |
+| [Examples](https://hardfoc.github.io/hf-bmp581-driver/latest/examples/) | ESP32-S3 applications |
+| [API reference](https://hardfoc.github.io/hf-bmp581-driver/latest/api/) | Doxygen, every class and member |
 
-## Examples
+The pages are in [`docs/`](docs/index.md).
 
-`examples/esp32/` — `bmp581_minimal_example` (init + 1 Hz print) and
-`bmp581_baro_demo` (data-ready polling, noise statistics). Build with
-`./scripts/build_app.sh <app> Debug` after `git submodule update --init --recursive`.
+## Tests
 
-## Official references
+```bash
+cmake -S . -B build-host -DHF_BMP581_BUILD_TESTS=ON && cmake --build build-host && ctest --test-dir build-host
+```
 
-- Bosch BMP581 data sheet (BST-BMP581-DS004)
-- [`boschsensortec/BMP5_SensorAPI`](https://github.com/boschsensortec/BMP5_SensorAPI) v1.1.1 (BSD-3) — see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+The host tests run the driver against a model of the chip's registers; the code on the documentation site is
+compiled by the same build.
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Register procedures ported from Bosch's BSD-3
-Sensor API; notice reproduced in `THIRD_PARTY_NOTICES.md`.
+MIT. See [LICENSE](LICENSE). Register sequences follow the Bosch BMP5 Sensor API (BSD-3); its notice is in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
