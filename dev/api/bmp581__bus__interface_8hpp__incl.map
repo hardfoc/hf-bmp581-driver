@@ -1,0 +1,7 @@
+<map id="inc/bmp581_bus_interface.hpp" name="inc/bmp581_bus_interface.hpp">
+<area shape="rect" id="Node000001" title="CRTP register transport for the Bosch BMP581 (I2C or SPI)." alt="" coords="5,5,227,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="34,79,105,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,32,87,69,82,66,106,30"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="129,79,196,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="126,30,150,66,145,69,121,32"/>
+</map>
