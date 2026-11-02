@@ -1,11 +1,3 @@
----
-layout: default
-title: "HardFOC BMP581 Driver"
-description: "Hardware-agnostic C++17 driver for the Bosch BMP581 barometric pressure sensor (I2C / SPI)"
-nav_order: 1
-permalink: /
----
-
 # HF-BMP581 Driver
 
 **Header-only C++17 driver for the Bosch BMP581 barometric pressure sensor**:

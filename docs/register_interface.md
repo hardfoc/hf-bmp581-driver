@@ -1,11 +1,3 @@
----
-layout: default
-title: "Register interface"
-nav_order: 3
-parent: "Documentation"
-permalink: /docs/register-interface/
----
-
 # Register interface
 
 Source: Bosch BMP581 data sheet (BST-BMP581-DS004) and BMP5 Sensor API v1.1.1.
