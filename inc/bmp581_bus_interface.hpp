@@ -10,12 +10,15 @@
  *            - `void DelayUs(uint32_t us);`
  *            - `bool EnsureInitialized();`
  *
- *          I2C: `WriteRegs` sends `[reg, data…]`; `ReadRegs` writes `reg` then
- *          reads `len` bytes (7-bit address 0x46 or 0x47 selected by SDO).
- *          SPI (4-wire): the adapter must set bit 7 of `reg` for reads
- *          (`reg | 0x80`) and discard the first dummy byte the device clocks
- *          out after the register byte; writes use `reg & 0x7F`. Register
- *          auto-increment applies on both buses.
+ *          I2C: `WriteRegs` sends `[reg, data…]` (auto-increment); `ReadRegs`
+ *          writes `reg` then reads `len` bytes (7-bit address 0x46 or 0x47
+ *          selected by SDO).
+ *          SPI: reads send `reg | 0x80` and the data follows the address
+ *          byte directly (no dummy byte), with auto-increment. Writes do not
+ *          auto-increment: send `(reg + i) & 0x7F` before each data byte.
+ *          The device starts in I2C mode after power-up and after a soft
+ *          reset; one dummy SPI read selects SPI (its data is invalid).
+ *          I2C: the device does not acknowledge a write of 0xB6 to CMD.
  *
  * @copyright Copyright (c) 2026 HardFOC. All rights reserved.
  */

@@ -1,0 +1,14 @@
+{
+  "driver-layers": {
+    "title": "Three layers, one of them yours",
+    "alt": "Layer diagram: the application calls the hardware-agnostic BMP581 driver, which reads and writes registers through the CRTP register transport, which calls the platform port you write, which drives the I2C or SPI bus of the BMP581.",
+    "description": "From top to bottom. Your application talks to one bmp581::Driver<Bus> object, whose public calls are listed from inc/bmp581_driver.hpp. Each call becomes register reads and writes in the order the datasheet requires (the standby hop, IIR writes in standby, POR and NVM checks). The register transport (BusInterface in inc/bmp581_bus_interface.hpp) is a CRTP base with four methods. The platform port is the only code you write: a class that implements them over I2C or SPI. Below it is the sensor.",
+    "profile": "overview",
+    "width": 1200,
+    "source": "docs/diagrams/figures/driver-layers.py",
+    "sources": [
+      "inc/bmp581_driver.hpp:Driver public members",
+      "inc/bmp581_bus_interface.hpp:BusInterface"
+    ]
+  }
+}

@@ -32,6 +32,7 @@ option(HF_BMP581_BUILD_TESTS "Build host unit tests (no hardware)" OFF)
 if(HF_BMP581_BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests/host)
+  add_subdirectory(tests/docs)
 endif()
 
 include(CMakePackageConfigHelpers)
