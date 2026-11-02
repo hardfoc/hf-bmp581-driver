@@ -5,8 +5,19 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+### Added
+
+- Optional `static constexpr bmp581::Interface kInterface` in the port (`Interface::I2c` or `Interface::Spi`) tells
+  the driver which bus it drives; `bmp581::kBusInterface<Bus>` reads it. Without it the driver accepts the
+  soft-reset command's missing ACK and does the SPI dummy read, which is correct on either bus. The documented
+  I2C and SPI ports and the ESP32 I2C port declare it and no longer special-case the reset command.
+
 ### Changed
 
+- **Breaking (behaviour):** `SoftReset()` can now also fail with `InvalidChipId`, `NvmNotReady` or `NvmCommandError`
+  (the post-reset checks of datasheet section 4.3.9), and a port that declares `Interface::Spi` gets `Bus` when the
+  reset command itself fails to send. A port without `kInterface` sees one extra CHIP_ID read in `Init()` and in
+  `SoftReset()` (the SPI dummy read).
 - Documentation moved to the HardFOC MkDocs platform: new page set (quickstart, hardware, architecture, register
   interface, API guide, configuration, porting, testing), code snippets compiled by the host build from
   `tests/docs/`, Doxygen under `/api/`, versioned with mike. The Jekyll site files and the vendored
@@ -18,6 +29,15 @@ All notable changes to this project are documented in this file. The format foll
 
 ### Fixed
 
+- `SoftReset()` works over I2C. The chip does not acknowledge the write of 0xB6 to CMD (datasheet section 7.36), so
+  every I2C port that reported the missing ACK made `SoftReset()` return `Bus`, and `Init()` skipped its recovery
+  reset for a part whose NVM boot had not finished. The driver now accepts the failed status of that one write
+  (unless the port declares SPI, which has no ACK), waits t_soft_res (2 ms, Table 4) and verifies the reset as
+  section 4.3.9 recommends: CHIP_ID not 0, STATUS `nvm_rdy` = 1 and `nvm_err` = 0, INT_STATUS `por` = 1. Every
+  other failed transfer, including those reads, is still reported as `Bus`.
+- `SoftReset()` and `Init()` select SPI again. Power-up and a soft reset return the interface to I2C until a dummy
+  SPI read (section 5.1, Table 16); the driver now does that read itself in `Init()` and after the reset, so the
+  CHIP_ID / STATUS / INT_STATUS checks no longer read the invalid switching data over SPI.
 - `int_config::kPadDriveMask` is `0xF0`, the `pad_int_drv` field at INT_CONFIG bits 7:4 (datasheet section 7.5).
   It was `0x70` and missed bit 7, the drive-strength MSB. Code that masks or sets the pad drive strength with it
   now reaches the whole field. New: `int_config::kPadDriveShift` (4).

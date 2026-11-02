@@ -25,6 +25,9 @@ public:
   // 7-bit address: 0x46 with SDO low, 0x47 with SDO high.
   explicit MyI2c(uint8_t address = bmp581::addr::kSecondary) noexcept : address_(address) {}
 
+  // Tells the driver no SPI dummy read is needed. It also accepts the soft-reset command's missing ACK.
+  static constexpr bmp581::Interface kInterface = bmp581::Interface::I2c;
+
   // One transaction: [reg, data...]. The chip increments the register address after each byte.
   bool WriteRegs(uint8_t reg, const uint8_t* data, std::size_t len) noexcept {
     uint8_t frame[16];
@@ -33,10 +36,7 @@ public:
     }
     frame[0] = reg;
     std::memcpy(frame + 1, data, len);
-    const bool acked = platform_i2c_write(address_, frame, len + 1);
-    // The BMP581 does not acknowledge a soft-reset command over I2C: count that write as sent.
-    const bool soft_reset = reg == bmp581::reg::kCmd && len == 1 && data[0] == bmp581::cmd::kSoftReset;
-    return acked || soft_reset;
+    return platform_i2c_write(address_, frame, len + 1);  // report every missing ACK
   }
 
   // Write the register address, repeated START, read len bytes (auto-increment).

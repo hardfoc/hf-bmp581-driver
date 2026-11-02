@@ -11,7 +11,7 @@ problems; the others mean the chip answered but did not confirm a step.
 | --- | --- | --- |
 | `NotInitialized` | Your port's `EnsureInitialized()` returned `false` | Install or open the bus before `Init()` |
 | `Bus` | No acknowledge at the address, or a dead bus | Address from SDO (0x46 low, 0x47 high), pull-ups to VDDIO, CSB tied to VDDIO for I2C |
-| `InvalidChipId` | Another part at that address, SDO floating, or the first SPI read after power-up | Check the address; on SPI do one dummy read before `Init()` ([Porting](porting.md#spi-port)) |
+| `InvalidChipId` | Another part at that address, SDO floating, or an SPI port without `kInterface`, read before SPI was selected | Check the address; on SPI declare `kInterface = Interface::Spi` ([Porting](porting.md#what-you-implement)) |
 | `NvmNotReady` | The NVM had not loaded, or `nvm_err` is set | `Init()` already soft-resets once when STATUS reads 0. Wait at least 2 ms (t_powup) after power-up; if it persists, the part is faulty |
 | `NvmCommandError` | `nvm_cmd_err` left over from an earlier NVM command | Soft reset, then `Init()` again |
 
@@ -19,8 +19,9 @@ problems; the others mean the chip answered but did not confirm a step.
 
 | Error | Cause | Fix |
 | --- | --- | --- |
-| `Bus` over I2C | The chip does not acknowledge the reset command and your port reports it | Count the write of 0xB6 to CMD as sent ([Porting](porting.md#i2c-port)) |
-| `PorSoftReset` over SPI | The reset returned the chip to I2C mode, so the INT_STATUS read was the invalid switching read | Do a dummy read after the reset in the port |
+| `Bus` | A read after the reset failed (the missing ACK of the reset command itself is expected and accepted over I2C), or an SPI port failed to send the command | The same wiring checks as for `Init()` |
+| `InvalidChipId` | CHIP_ID read 0 after the reset: the chip did not come back, or (SPI) the port declares `Interface::I2c` | Check the supply; declare the right `kInterface` |
+| `NvmNotReady` | STATUS `nvm_rdy` = 0 or `nvm_err` = 1 after the reset | Reset once more; if it persists, the part is faulty |
 | `PorSoftReset` | Something else read INT_STATUS in between (reading clears it) | Do not poll INT_STATUS from another task during the reset |
 
 ## Readings
@@ -41,7 +42,7 @@ problems; the others mean the chip answered but did not confirm a step.
 | --- | --- | --- |
 | Two-byte settings come back wrong | The port sends `[reg] [d0] [d1]`; SPI writes do not auto-increment | Send one address byte before each data byte |
 | Every read is shifted by one byte | The port drops a "dummy" byte the BMP581 does not send | Take data from the byte right after the address |
-| Works until the first soft reset | A soft reset selects I2C again | Dummy read after the reset |
+| Works until the first soft reset | A soft reset selects I2C again, and the port does not declare `kInterface = Interface::Spi` | Declare it: the driver then does the dummy read after the reset |
 
 ## Next
 

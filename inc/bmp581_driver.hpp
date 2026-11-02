@@ -4,9 +4,9 @@
  *
  * @details Ported from the register sequences of the Bosch BMP5 Sensor API
  *          (v1.1.1, BSD-3) into a header-only C++17 driver: chip-id / NVM-ready
- *          init, soft reset with POR check, power modes with the mandatory
- *          standby hop, OSR/ODR, IIR (standby-only write, mode restored),
- *          interrupt pin / source configuration, data-ready polling, 24-bit
+ *          init, soft reset with the CHIP_ID / STATUS / POR check, power
+ *          modes with the mandatory standby hop, OSR/ODR, IIR (standby-only
+ *          write, mode restored), interrupt pin / source configuration, data-ready polling, 24-bit
  *          pressure (1/64 Pa) and temperature (1/65536 °C) read, and NVM
  *          user-word read. FIFO is intentionally out of scope.
  *
@@ -49,13 +49,18 @@ public:
 
     /**
      * @brief Verify chip id (0x50 / 0x51) and NVM readiness.
-     * @note For SPI adapters the first read after power-up may return junk;
-     *       the adapter should perform one dummy read, or call `Init()` twice.
+     *
+     * On SPI (and for an adapter that does not declare `kInterface`) the
+     * first access is the dummy read that switches the chip from I2C to SPI
+     * (datasheet section 5.1); its data is discarded.
      */
     DriverResult<void> Init() noexcept {
         chip_id_ = 0;
         if (!bus_.EnsureInitialized()) {
             return DriverResult<void>::failure(DriverError::NotInitialized);
+        }
+        if (!SelectSpi()) {
+            return DriverResult<void>::failure(DriverError::Bus);
         }
         uint8_t id = 0;
         if (!bus_.ReadRegs(reg::kChipId, &id, 1)) {
@@ -69,10 +74,14 @@ public:
             /* Seen on hardware: a part that answers its chip id with STATUS == 0
              * (core/NVM boot never completed after power-up). A soft reset
              * re-runs the NVM boot; give it t_soft_reset + margin and re-check. */
-            if (WriteReg(reg::kCmd, cmd::kSoftReset)) {
-                bus_.DelayUs(timing::kSoftResetUs + timing::kStartupUs);
-                nvm = NvmReadyCheck();
+            if (!WriteResetCommand()) {
+                return DriverResult<void>::failure(DriverError::Bus);
             }
+            bus_.DelayUs(timing::kSoftResetUs + timing::kStartupUs);
+            if (!SelectSpi()) {
+                return DriverResult<void>::failure(DriverError::Bus);
+            }
+            nvm = NvmReadyCheck();
         }
         if (nvm != DriverError::None) {
             return DriverResult<void>::failure(nvm);
@@ -84,12 +93,38 @@ public:
         return DriverResult<void>::success();
     }
 
-    /// CMD = 0xB6, wait 2 ms, confirm INT_STATUS.por_softreset_complete.
+    /**
+     * @brief Soft reset: CMD = 0xB6, wait t_soft_res (2 ms), reselect SPI, verify.
+     *
+     * - Over I2C the chip does not acknowledge the reset command (datasheet
+     *   section 7.36), so a failed status from that one write is expected and
+     *   not an error. With `kInterface == Interface::Spi` it is reported as `Bus`.
+     * - The reset returns the interface to I2C (section 5.1, Table 16); on SPI
+     *   (or an undeclared interface) one dummy read selects SPI again.
+     * - The reset is then verified as section 4.3.9 recommends: CHIP_ID not 0
+     *   (`InvalidChipId`), STATUS `nvm_rdy` = 1 and `nvm_err` = 0 (`NvmNotReady`,
+     *   `NvmCommandError`), INT_STATUS `por` = 1 (`PorSoftReset`). Every read
+     *   after the reset command reports its own bus error as `Bus`.
+     */
     DriverResult<void> SoftReset() noexcept {
-        if (!WriteReg(reg::kCmd, cmd::kSoftReset)) {
+        if (!WriteResetCommand()) {
             return DriverResult<void>::failure(DriverError::Bus);
         }
         bus_.DelayUs(timing::kSoftResetUs);
+        if (!SelectSpi()) {
+            return DriverResult<void>::failure(DriverError::Bus);
+        }
+        uint8_t id = 0;
+        if (!bus_.ReadRegs(reg::kChipId, &id, 1)) {
+            return DriverResult<void>::failure(DriverError::Bus);
+        }
+        if (id == 0) {
+            return DriverResult<void>::failure(DriverError::InvalidChipId);
+        }
+        const DriverError nvm = NvmReadyCheck();
+        if (nvm != DriverError::None) {
+            return DriverResult<void>::failure(nvm);
+        }
         uint8_t st = 0;
         if (!bus_.ReadRegs(reg::kIntStatus, &st, 1)) {
             return DriverResult<void>::failure(DriverError::Bus);
@@ -100,7 +135,7 @@ public:
         return DriverResult<void>::success();
     }
 
-    /// Soft reset → OSR/ODR → IIR → power mode, in the order the device requires.
+    /// Standby → OSR/ODR → IIR → power mode, in the order the device requires.
     DriverResult<void> Configure(const Config& cfg) noexcept {
         auto r = SetPowerMode(PowerMode::Standby);
         if (!r.ok()) return r;
@@ -401,7 +436,40 @@ public:
     }
 
 private:
+    static constexpr Interface kInterface = kBusInterface<BusT>;
+
     bool WriteReg(uint8_t r, uint8_t v) noexcept { return bus_.WriteRegs(r, &v, 1); }
+
+    /**
+     * Write CMD = 0xB6. Over I2C the chip does not acknowledge this write
+     * (datasheet section 7.36, CMD value 0xB6), so the adapter's status for
+     * this one write is ignored unless the adapter declares SPI, where there
+     * is no acknowledge to miss. The caller verifies the reset by reading.
+     */
+    bool WriteResetCommand() noexcept {
+        const bool sent = WriteReg(reg::kCmd, cmd::kSoftReset);
+        if constexpr (kInterface == Interface::Spi) {
+            return sent;
+        } else {
+            (void)sent;
+            return true;
+        }
+    }
+
+    /**
+     * Dummy read that switches the interface from I2C to SPI (datasheet
+     * section 5.1 and Table 16: at least 16 SCK edges with CSB low, then CSB
+     * high; the data is invalid). Needed after power-up and after every soft
+     * reset. Skipped for an adapter that declares I2C.
+     */
+    bool SelectSpi() noexcept {
+        if constexpr (kInterface == Interface::I2c) {
+            return true;
+        } else {
+            uint8_t dummy = 0;
+            return bus_.ReadRegs(reg::kChipId, &dummy, 1);
+        }
+    }
 
     bool WritePowerModeBits(PowerMode mode, bool deep_disable) noexcept {
         uint8_t odr = 0;

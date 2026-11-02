@@ -121,8 +121,8 @@ whether the data registers show filtered or unfiltered values; `IirConfig` sets 
 
 | Call | Sequence |
 | --- | --- |
-| `Init()` | `EnsureInitialized()`; read CHIP_ID (not 0); STATUS: `nvm_rdy` = 1, `nvm_err` = 0 (if not, one soft reset, wait 5 ms, check again); accept `0x50` / `0x51` |
-| `SoftReset()` | CMD = `0xB6`; wait 2 ms; INT_STATUS `por` must be 1 |
+| `Init()` | `EnsureInitialized()`; SPI: one dummy read; read CHIP_ID (not 0); STATUS: `nvm_rdy` = 1, `nvm_err` = 0 (if not, one soft reset, wait 5 ms, SPI dummy read, check again); accept `0x50` / `0x51` |
+| `SoftReset()` | CMD = `0xB6` (over I2C not acknowledged, accepted); wait 2 ms; SPI: one dummy read; CHIP_ID not 0; STATUS `nvm_rdy` = 1, `nvm_err` = 0; INT_STATUS `por` = 1 (section 4.3.9) |
 | `SetPowerMode()` | Read ODR_CONFIG; if not standby, write standby with `deep_dis` = 1 and wait 2.5 ms; write the target mode |
 | `SetOsrOdr()` | Leave deep standby if the ODR is faster than 5 Hz; read-modify-write OSR_CONFIG and ODR_CONFIG together |
 | `SetIir()` | Standby; read-modify-write DSP_CONFIG and DSP_IIR; restore the previous mode |
