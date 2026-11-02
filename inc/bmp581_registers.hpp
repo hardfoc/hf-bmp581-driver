@@ -75,7 +75,7 @@ constexpr uint32_t kSoftResetUs = 2000;
 constexpr uint32_t kStandbyUs = 2500;
 constexpr uint32_t kNvmReadyReadUs = 800;
 constexpr uint32_t kNvmReadyWriteUs = 10000;
-constexpr uint32_t kStartupUs = 3000;  ///< POR → ready
+constexpr uint32_t kStartupUs = 3000;  ///< t_startup: standby to start of measurement
 }  // namespace timing
 
 /// NVM user space (3 × 16-bit words).
