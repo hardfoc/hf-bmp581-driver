@@ -21,6 +21,7 @@ ctest --test-dir build-host --output-on-failure
 | `TestPowerModes` | The standby hop and its delay, deep standby |
 | `TestOsrOdrIir` | Bit packing of OSR_CONFIG, ODR_CONFIG, DSP_CONFIG and DSP_IIR; mode restore after `SetIir()` |
 | `TestInterruptsAndSample` | INT_CONFIG and INT_SOURCE packing, data-ready, 24-bit decoding (101325 Pa as `0x62F340`) |
+| `TestIntConfigFields` | INT_CONFIG field masks tile the register (`pad_int_drv` is bits 7:4); `ConfigureInterrupt()` keeps the pad drive bits |
 | `TestNvm` | The NVM read sequence and address checks |
 
 All tests are in [`tests/host/bmp581_driver_test.cpp`](../tests/host/bmp581_driver_test.cpp).

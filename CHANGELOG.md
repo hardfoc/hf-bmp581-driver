@@ -16,6 +16,12 @@ All notable changes to this project are documented in this file. The format foll
   writes do not auto-increment, a soft reset is not acknowledged over I2C and returns the interface to I2C mode,
   power-up time is 2 ms (3 ms is the start-up time from standby).
 
+### Fixed
+
+- `int_config::kPadDriveMask` is `0xF0`, the `pad_int_drv` field at INT_CONFIG bits 7:4 (datasheet section 7.5).
+  It was `0x70` and missed bit 7, the drive-strength MSB. Code that masks or sets the pad drive strength with it
+  now reaches the whole field. New: `int_config::kPadDriveShift` (4).
+
 ## [1.0.0]
 
 ### Added

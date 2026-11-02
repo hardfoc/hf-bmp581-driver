@@ -190,6 +190,25 @@ void TestInterruptsAndSample() {
     CHECK(rs.ok() && rs.value.pressure_raw == 6484800U);
 }
 
+// INT_CONFIG (0x14) layout, datasheet section 7.5: int_mode 0, int_pol 1, int_od 2, int_en 3,
+// pad_int_drv 7:4. The fields must tile the register with no gap or overlap.
+void TestIntConfigFields() {
+    namespace ic = bmp581::int_config;
+    CHECK(ic::kPadDriveMask == 0xF0);
+    CHECK((ic::kPadDriveMask >> ic::kPadDriveShift) == 0x0F);
+    CHECK((ic::kModeMask | ic::kPolMask | ic::kOdMask | ic::kEnableMask | ic::kPadDriveMask) == 0xFF);
+    CHECK((ic::kPadDriveMask & (ic::kModeMask | ic::kPolMask | ic::kOdMask | ic::kEnableMask)) == 0);
+
+    // ConfigureInterrupt() leaves the whole pad_int_drv field as it found it.
+    FakeBus bus;
+    bus.regs[bmp581::reg::kIntConfig] = 0xF0;
+    bmp581::Driver<FakeBus> dev(bus);
+    bmp581::InterruptConfig cfg{};
+    cfg.enable = true;
+    CHECK(dev.ConfigureInterrupt(cfg).ok());
+    CHECK((bus.regs[bmp581::reg::kIntConfig] & ic::kPadDriveMask) == 0xF0);
+}
+
 void TestNvm() {
     FakeBus bus;
     bmp581::Driver<FakeBus> dev(bus);
@@ -223,6 +242,7 @@ int main() {
     TestPowerModes();
     TestOsrOdrIir();
     TestInterruptsAndSample();
+    TestIntConfigFields();
     TestNvm();
     TestPreset();
     if (g_failures == 0) {
