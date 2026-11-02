@@ -1,0 +1,5 @@
+<map id="inc/bmp581_driver.hpp" name="inc/bmp581_driver.hpp">
+<area shape="rect" id="Node000001" title="Bosch BMP581 barometric pressure sensor client (I2C or SPI via CRTP bus)." alt="" coords="5,5,176,31"/>
+<area shape="rect" id="Node000002" href="$bmp581_8hpp.html" title="Umbrella header for the HF&#45;BMP581 barometric pressure sensor driver." alt="" coords="27,79,154,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,44,93,79,88,79,88,44"/>
+</map>
