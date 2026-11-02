@@ -1377,7 +1377,7 @@
 <h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h1>
 <p>The settings that decide noise, bandwidth, data rate and current: what each one does, the struct that holds it, and
 presets for common uses.</p>
-<p>Every snippet here is compiled from <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/tests/docs/configuration.cpp"><code>tests/docs/configuration.cpp</code></a>.</p>
+<p>Every snippet here is compiled from <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/tests/docs/configuration.cpp"><code>tests/docs/configuration.cpp</code></a>.</p>
 <h2 id="the-preset">The preset<a class="headerlink" href="#the-preset" title="Permanent link">&para;</a></h2>
 <div class="language-cpp highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">bmp581</span><span class="o">::</span><span class="n">DriverResult</span><span class="o">&lt;</span><span class="kt">void</span><span class="o">&gt;</span><span class="w"> </span><span class="n">use_preset</span><span class="p">(</span><span class="n">bmp581</span><span class="o">::</span><span class="n">Driver</span><span class="o">&lt;</span><span class="n">MyI2c</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">dev</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="n">dev</span><span class="p">.</span><span class="n">Configure</span><span class="p">(</span><span class="n">bmp581</span><span class="o">::</span><span class="n">BarometricReferencePreset</span><span class="p">());</span><span class="w">   </span><span class="c1">// 100.3 Hz, OSR p x8 / t x1, IIR 3, normal</span>
@@ -1619,7 +1619,7 @@ usually larger than the sensor's own: filter it with the IIR rather than with mo
 </tbody>
 </table>
 <h2 id="where-the-defaults-come-from">Where the defaults come from<a class="headerlink" href="#where-the-defaults-come-from" title="Permanent link">&para;</a></h2>
-<p>Each field's default is in its struct in <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/inc/bmp581_types.hpp"><code>inc/bmp581_types.hpp</code></a> and in the
+<p>Each field's default is in its struct in <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/inc/bmp581_types.hpp"><code>inc/bmp581_types.hpp</code></a> and in the
 <a href="../api-reference/">API reference</a>; the chip's own reset values are on <a href="../register-interface/#register-map">Register
 interface</a>.</p>
 

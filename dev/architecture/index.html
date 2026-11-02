@@ -1340,7 +1340,7 @@
 <details class="hf-figure-desc">
 <summary>Figure description and sources</summary>
 <p>From top to bottom. Your application talks to one bmp581::Driver<Bus> object, whose public calls are listed from inc/bmp581_driver.hpp. Each call becomes register reads and writes in the order the datasheet requires (the standby hop, IIR writes in standby, POR and NVM checks). The register transport (BusInterface in inc/bmp581_bus_interface.hpp) is a CRTP base with four methods. The platform port is the only code you write: a class that implements them over I2C or SPI. Below it is the sensor.</p>
-<p>Drawn from: <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/inc/bmp581_driver.hpp"><code>inc/bmp581_driver.hpp</code></a> <code>Driver public members</code>; <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/inc/bmp581_bus_interface.hpp"><code>inc/bmp581_bus_interface.hpp</code></a> <code>BusInterface</code>; figure module <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/docs/diagrams/figures/driver-layers.py"><code>docs/diagrams/figures/driver-layers.py</code></a>.</p>
+<p>Drawn from: <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/inc/bmp581_driver.hpp"><code>inc/bmp581_driver.hpp</code></a> <code>Driver public members</code>; <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/inc/bmp581_bus_interface.hpp"><code>inc/bmp581_bus_interface.hpp</code></a> <code>BusInterface</code>; figure module <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/docs/diagrams/figures/driver-layers.py"><code>docs/diagrams/figures/driver-layers.py</code></a>.</p>
 </details>
 <h2 id="the-three-layers">The three layers<a class="headerlink" href="#the-three-layers" title="Permanent link">&para;</a></h2>
 <table>
@@ -1355,13 +1355,13 @@
 <tbody>
 <tr>
 <td><strong>Hardware-agnostic core</strong>: <code>Driver&lt;Bus&gt;</code></td>
-<td><a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/inc/bmp581_driver.hpp"><code>inc/bmp581_driver.hpp</code></a></td>
+<td><a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/inc/bmp581_driver.hpp"><code>inc/bmp581_driver.hpp</code></a></td>
 <td>The transport's four methods</td>
 <td>Never, for a new board</td>
 </tr>
 <tr>
 <td><strong>Register transport</strong>: <code>BusInterface&lt;Bus&gt;</code></td>
-<td><a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/inc/bmp581_bus_interface.hpp"><code>inc/bmp581_bus_interface.hpp</code></a></td>
+<td><a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/inc/bmp581_bus_interface.hpp"><code>inc/bmp581_bus_interface.hpp</code></a></td>
 <td>Your port</td>
 <td>Never</td>
 </tr>
@@ -1405,7 +1405,7 @@ template parameter too.</p>
 never logs; what to do with an error is the application's decision.</p>
 <h2 id="what-the-driver-does-not-cover">What the driver does not cover<a class="headerlink" href="#what-the-driver-does-not-cover" title="Permanent link">&para;</a></h2>
 <p>The FIFO (32 frames), out-of-range pressure detection and NVM programming are not wrapped. The register addresses
-and bit masks are in <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/inc/bmp581_registers.hpp"><code>bmp581_registers.hpp</code></a>; reach them with <code>ReadRegister()</code>
+and bit masks are in <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/inc/bmp581_registers.hpp"><code>bmp581_registers.hpp</code></a>; reach them with <code>ReadRegister()</code>
 and <code>WriteRegister()</code> (<a href="../api-guide/#use-any-register-directly">API guide</a>).</p>
 <h2 id="source-map">Source map<a class="headerlink" href="#source-map" title="Permanent link">&para;</a></h2>
 <table>

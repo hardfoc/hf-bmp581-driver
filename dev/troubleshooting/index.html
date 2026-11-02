@@ -1334,8 +1334,8 @@ problems; the others mean the chip answered but did not confirm a step.</p>
 </tr>
 <tr>
 <td><code>InvalidChipId</code></td>
-<td>Another part at that address, SDO floating, or the first SPI read after power-up</td>
-<td>Check the address; on SPI do one dummy read before <code>Init()</code> (<a href="../porting/#spi-port">Porting</a>)</td>
+<td>Another part at that address, SDO floating, or an SPI port without <code>kInterface</code>, read before SPI was selected</td>
+<td>Check the address; on SPI declare <code>kInterface = Interface::Spi</code> (<a href="../porting/#what-you-implement">Porting</a>)</td>
 </tr>
 <tr>
 <td><code>NvmNotReady</code></td>
@@ -1360,14 +1360,19 @@ problems; the others mean the chip answered but did not confirm a step.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>Bus</code> over I2C</td>
-<td>The chip does not acknowledge the reset command and your port reports it</td>
-<td>Count the write of 0xB6 to CMD as sent (<a href="../porting/#i2c-port">Porting</a>)</td>
+<td><code>Bus</code></td>
+<td>A read after the reset failed (the missing ACK of the reset command itself is expected and accepted over I2C), or an SPI port failed to send the command</td>
+<td>The same wiring checks as for <code>Init()</code></td>
 </tr>
 <tr>
-<td><code>PorSoftReset</code> over SPI</td>
-<td>The reset returned the chip to I2C mode, so the INT_STATUS read was the invalid switching read</td>
-<td>Do a dummy read after the reset in the port</td>
+<td><code>InvalidChipId</code></td>
+<td>CHIP_ID read 0 after the reset: the chip did not come back, or (SPI) the port declares <code>Interface::I2c</code></td>
+<td>Check the supply; declare the right <code>kInterface</code></td>
+</tr>
+<tr>
+<td><code>NvmNotReady</code></td>
+<td>STATUS <code>nvm_rdy</code> = 0 or <code>nvm_err</code> = 1 after the reset</td>
+<td>Reset once more; if it persists, the part is faulty</td>
 </tr>
 <tr>
 <td><code>PorSoftReset</code></td>
@@ -1445,8 +1450,8 @@ problems; the others mean the chip answered but did not confirm a step.</p>
 </tr>
 <tr>
 <td>Works until the first soft reset</td>
-<td>A soft reset selects I2C again</td>
-<td>Dummy read after the reset</td>
+<td>A soft reset selects I2C again, and the port does not declare <code>kInterface = Interface::Spi</code></td>
+<td>Declare it: the driver then does the dummy read after the reset</td>
 </tr>
 </tbody>
 </table>

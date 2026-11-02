@@ -1394,13 +1394,22 @@ folder with the generated <code>bmp581_version.h</code>, and requires C++17 (<co
 </tr>
 </tbody>
 </table>
+<p>To use an installed copy instead, install it once and find the package:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>cmake<span class="w"> </span>-S<span class="w"> </span>external/hf-bmp581-driver<span class="w"> </span>-B<span class="w"> </span>build-bmp581
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>cmake<span class="w"> </span>--install<span class="w"> </span>build-bmp581<span class="w"> </span>--prefix<span class="w"> </span>/opt/hf
+</span></code></pre></div>
+<div class="language-cmake highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nb">find_package</span><span class="p">(</span><span class="s">hf_bmp581</span><span class="w"> </span><span class="s">CONFIG</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span><span class="w">        </span><span class="c"># with /opt/hf on CMAKE_PREFIX_PATH</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">my_app</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="s">hf::bmp581</span><span class="p">)</span>
+</span></code></pre></div>
+<p><code>cmake --install</code> copies the headers of <code>inc/</code> and the generated <code>bmp581_version.h</code> into <code>include/</code>, and the package
+files into <code>lib/cmake/hf_bmp581/</code>. The installed target has the same name, <code>hf::bmp581</code>.</p>
 <p>Without <code>add_subdirectory</code>, include the settings file and use its variables:</p>
-<div class="language-cmake highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">include</span><span class="p">(</span><span class="s">external/hf-bmp581-driver/cmake/hf_bmp581_build_settings.cmake</span><span class="p">)</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">target_include_directories</span><span class="p">(</span><span class="s">my_app</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="o">${</span><span class="nv">HF_BMP581_PUBLIC_INCLUDE_DIRS</span><span class="o">}</span><span class="p">)</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">target_compile_features</span><span class="p">(</span><span class="s">my_app</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="s">cxx_std_17</span><span class="p">)</span>
+<div class="language-cmake highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nb">include</span><span class="p">(</span><span class="s">external/hf-bmp581-driver/cmake/hf_bmp581_build_settings.cmake</span><span class="p">)</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nb">target_include_directories</span><span class="p">(</span><span class="s">my_app</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="o">${</span><span class="nv">HF_BMP581_PUBLIC_INCLUDE_DIRS</span><span class="o">}</span><span class="p">)</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nb">target_compile_features</span><span class="p">(</span><span class="s">my_app</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="s">cxx_std_17</span><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="esp-idf">ESP-IDF<a class="headerlink" href="#esp-idf" title="Permanent link">&para;</a></h2>
-<p>The ESP-IDF component wrapper is <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/examples/esp32/components/hf_bmp581/CMakeLists.txt"><code>examples/esp32/components/hf_bmp581/</code></a>.
+<p>The ESP-IDF component wrapper is <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/examples/esp32/components/hf_bmp581/CMakeLists.txt"><code>examples/esp32/components/hf_bmp581/</code></a>.
 Copy that folder into your project's <code>components/</code> (or point <code>EXTRA_COMPONENT_DIRS</code> at it) and set the
 <code>HF_BMP581_ROOT</code> cache variable to the driver checkout; the wrapper stops with a clear message when the path is
 wrong. Your component then declares <code>REQUIRES hf_bmp581</code>. The wrapper requires the IDF <code>driver</code> component, which
@@ -1417,17 +1426,17 @@ the example I2C port uses.</p>
 <tbody>
 <tr>
 <td>Settings</td>
-<td><a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/cmake/hf_bmp581_build_settings.cmake"><code>cmake/hf_bmp581_build_settings.cmake</code></a></td>
+<td><a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/cmake/hf_bmp581_build_settings.cmake"><code>cmake/hf_bmp581_build_settings.cmake</code></a></td>
 <td>Target name, include directories, version: the single source of truth</td>
 </tr>
 <tr>
 <td>Library</td>
-<td><a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/CMakeLists.txt"><code>CMakeLists.txt</code></a></td>
-<td><code>INTERFACE</code> target and package version files</td>
+<td><a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/CMakeLists.txt"><code>CMakeLists.txt</code></a></td>
+<td><code>INTERFACE</code> target, install rules and package files</td>
 </tr>
 <tr>
 <td>ESP-IDF</td>
-<td><a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/examples/esp32/components/hf_bmp581/CMakeLists.txt"><code>examples/esp32/components/hf_bmp581/CMakeLists.txt</code></a></td>
+<td><a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/examples/esp32/components/hf_bmp581/CMakeLists.txt"><code>examples/esp32/components/hf_bmp581/CMakeLists.txt</code></a></td>
 <td>IDF component wrapper over the same settings</td>
 </tr>
 </tbody>
@@ -1464,7 +1473,7 @@ the example I2C port uses.</p>
 </table>
 <p>The version is set once in the settings file and written into <code>bmp581_version.h</code> at configure time. Read it at
 run time:</p>
-<div class="language-cpp highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bmp581</span><span class="o">::</span><span class="n">GetDriverVersion</span><span class="p">();</span><span class="w">   </span><span class="c1">// "1.0.0"</span>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bmp581</span><span class="o">::</span><span class="n">GetDriverVersion</span><span class="p">();</span><span class="w">   </span><span class="c1">// "1.0.0"</span>
 </span></code></pre></div>
 <h2 id="repository-layout">Repository layout<a class="headerlink" href="#repository-layout" title="Permanent link">&para;</a></h2>
 <table>

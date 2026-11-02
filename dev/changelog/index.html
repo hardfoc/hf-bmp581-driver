@@ -1142,10 +1142,32 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#changed" class="md-nav__link">
     <span class="md-ellipsis">
       
         Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
       
     </span>
   </a>
@@ -1170,7 +1192,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added" class="md-nav__link">
+  <a href="#added_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Added
@@ -1240,10 +1262,32 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Added
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#changed" class="md-nav__link">
     <span class="md-ellipsis">
       
         Changed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fixed
       
     </span>
   </a>
@@ -1268,7 +1312,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#added" class="md-nav__link">
+  <a href="#added_1" class="md-nav__link">
     <span class="md-ellipsis">
       
         Added
@@ -1313,8 +1357,22 @@
 <p>All notable changes to this project are documented in this file. The format follows
 <a href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a> and the project uses <a href="https://semver.org/">Semantic Versioning</a>.</p>
 <h2 id="unreleased">[Unreleased]<a class="headerlink" href="#unreleased" title="Permanent link">&para;</a></h2>
+<h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Optional <code>static constexpr bmp581::Interface kInterface</code> in the port (<code>Interface::I2c</code> or <code>Interface::Spi</code>) tells
+  the driver which bus it drives; <code>bmp581::kBusInterface&lt;Bus&gt;</code> reads it. Without it the driver accepts the
+  soft-reset command's missing ACK and does the SPI dummy read, which is correct on either bus. The documented
+  I2C and SPI ports and the ESP32 I2C port declare it and no longer special-case the reset command.</li>
+<li>ESP32 SPI port <code>hf_bmp581_examples::Bmp581EspIdfSpi</code> on the ESP-IDF <code>spi_master</code> driver (read bit 0x80, one
+  address byte per written byte, mode 0 or 3, at most 12 MHz, <code>kInterface = Interface::Spi</code>) and the
+  <code>bmp581_spi_example</code> app, built in CI.</li>
+</ul>
 <h3 id="changed">Changed<a class="headerlink" href="#changed" title="Permanent link">&para;</a></h3>
 <ul>
+<li><strong>Breaking (behaviour):</strong> <code>SoftReset()</code> can now also fail with <code>InvalidChipId</code>, <code>NvmNotReady</code> or <code>NvmCommandError</code>
+  (the post-reset checks of datasheet section 4.3.9), and a port that declares <code>Interface::Spi</code> gets <code>Bus</code> when the
+  reset command itself fails to send. A port without <code>kInterface</code> sees one extra CHIP_ID read in <code>Init()</code> and in
+  <code>SoftReset()</code> (the SPI dummy read).</li>
 <li>Documentation moved to the HardFOC MkDocs platform: new page set (quickstart, hardware, architecture, register
   interface, API guide, configuration, porting, testing), code snippets compiled by the host build from
   <code>tests/docs/</code>, Doxygen under <code>/api/</code>, versioned with mike. The Jekyll site files and the vendored
@@ -1324,8 +1382,31 @@
   writes do not auto-increment, a soft reset is not acknowledged over I2C and returns the interface to I2C mode,
   power-up time is 2 ms (3 ms is the start-up time from standby).</li>
 </ul>
+<h3 id="fixed">Fixed<a class="headerlink" href="#fixed" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Bus errors the driver dropped now reach the caller as <code>Bus</code>: the INT_STATUS read in <code>ConfigureInterrupt()</code>, the
+  FIFO_SEL / OSR / DSP reads with which <code>GetPowerMode()</code> (and every call built on it) tells deep standby from
+  standby, and the mode restore at the end of <code>ReadNvm()</code>. The port's <code>WriteRegs()</code> / <code>ReadRegs()</code> already return
+  <code>bool</code>; no port change is needed.</li>
+<li><code>cmake --install</code> installs the driver. It installed nothing: the package config was generated but not installed,
+  no headers were copied and no target was exported, so <code>find_package(hf_bmp581)</code> could not work. It now installs
+  every header the public headers include (<code>inc/*.hpp</code> and the generated <code>bmp581_version.h</code>) and exports the
+  documented target <code>hf::bmp581</code>. A host test installs the build tree and builds a <code>find_package()</code> consumer.</li>
+<li><code>SoftReset()</code> works over I2C. The chip does not acknowledge the write of 0xB6 to CMD (datasheet section 7.36), so
+  every I2C port that reported the missing ACK made <code>SoftReset()</code> return <code>Bus</code>, and <code>Init()</code> skipped its recovery
+  reset for a part whose NVM boot had not finished. The driver now accepts the failed status of that one write
+  (unless the port declares SPI, which has no ACK), waits t_soft_res (2 ms, Table 4) and verifies the reset as
+  section 4.3.9 recommends: CHIP_ID not 0, STATUS <code>nvm_rdy</code> = 1 and <code>nvm_err</code> = 0, INT_STATUS <code>por</code> = 1. Every
+  other failed transfer, including those reads, is still reported as <code>Bus</code>.</li>
+<li><code>SoftReset()</code> and <code>Init()</code> select SPI again. Power-up and a soft reset return the interface to I2C until a dummy
+  SPI read (section 5.1, Table 16); the driver now does that read itself in <code>Init()</code> and after the reset, so the
+  CHIP_ID / STATUS / INT_STATUS checks no longer read the invalid switching data over SPI.</li>
+<li><code>int_config::kPadDriveMask</code> is <code>0xF0</code>, the <code>pad_int_drv</code> field at INT_CONFIG bits 7:4 (datasheet section 7.5).
+  It was <code>0x70</code> and missed bit 7, the drive-strength MSB. Code that masks or sets the pad drive strength with it
+  now reaches the whole field. New: <code>int_config::kPadDriveShift</code> (4).</li>
+</ul>
 <h2 id="100">[1.0.0]<a class="headerlink" href="#100" title="Permanent link">&para;</a></h2>
-<h3 id="added">Added<a class="headerlink" href="#added" title="Permanent link">&para;</a></h3>
+<h3 id="added_1">Added<a class="headerlink" href="#added_1" title="Permanent link">&para;</a></h3>
 <ul>
 <li>Header-only C++17 driver <code>bmp581::Driver&lt;Bus&gt;</code> over a CRTP register transport (I2C or SPI): chip-id and
   NVM-ready initialisation, soft reset with the POR check, power modes with the standby hop, OSR / ODR, IIR,
@@ -1335,6 +1416,7 @@
 <li><code>BarometricReferencePreset()</code> (100 Hz, pressure OSR ×8, IIR 3).</li>
 <li>Host unit tests against a register-map fake; ESP32-S3 examples <code>bmp581_minimal_example</code> and <code>bmp581_baro_demo</code>.</li>
 </ul>
+<!-- markdownlint-configure-file {"MD024": {"siblings_only": true}} -->
 
 
 

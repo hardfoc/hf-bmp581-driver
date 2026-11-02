@@ -1335,7 +1335,7 @@
 oversampling and data-rate pairs work.</p>
 <p>Values come from the <a href="https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmp581-ds004.pdf">datasheet</a>
 (BST-BMP581-DS004, revision 1.13, chapter 7) and the Bosch BMP5 Sensor API v1.1.1. Every address and mask below is
-a constant in <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/inc/bmp581_registers.hpp"><code>inc/bmp581_registers.hpp</code></a>: <code>reg::kChipId</code> for <code>CHIP_ID</code>,
+a constant in <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/inc/bmp581_registers.hpp"><code>inc/bmp581_registers.hpp</code></a>: <code>reg::kChipId</code> for <code>CHIP_ID</code>,
 <code>int_status::kDataReady</code> for its bit 0, and so on.</p>
 <h2 id="register-map">Register map<a class="headerlink" href="#register-map" title="Permanent link">&para;</a></h2>
 <p>The subset the driver reads or writes. Register access is the same over I2C and SPI; SPI reads set bit 7 of the
@@ -1699,11 +1699,11 @@ whether the data registers show filtered or unfiltered values; <code>IirConfig</
 <tbody>
 <tr>
 <td><code>Init()</code></td>
-<td><code>EnsureInitialized()</code>; read CHIP_ID (not 0); STATUS: <code>nvm_rdy</code> = 1, <code>nvm_err</code> = 0 (if not, one soft reset, wait 5 ms, check again); accept <code>0x50</code> / <code>0x51</code></td>
+<td><code>EnsureInitialized()</code>; SPI: one dummy read; read CHIP_ID (not 0); STATUS: <code>nvm_rdy</code> = 1, <code>nvm_err</code> = 0 (if not, one soft reset, wait 5 ms, SPI dummy read, check again); accept <code>0x50</code> / <code>0x51</code></td>
 </tr>
 <tr>
 <td><code>SoftReset()</code></td>
-<td>CMD = <code>0xB6</code>; wait 2 ms; INT_STATUS <code>por</code> must be 1</td>
+<td>CMD = <code>0xB6</code> (over I2C not acknowledged, accepted); wait 2 ms; SPI: one dummy read; CHIP_ID not 0; STATUS <code>nvm_rdy</code> = 1, <code>nvm_err</code> = 0; INT_STATUS <code>por</code> = 1 (section 4.3.9)</td>
 </tr>
 <tr>
 <td><code>SetPowerMode()</code></td>

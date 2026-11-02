@@ -1472,8 +1472,8 @@ is 0).</p>
   power-down or soft reset. That transaction's data is invalid: do one dummy read first.</li>
 <li>3-wire SPI is selected by <code>DRIVE_CONFIG.spi3_en = 1</code>, written over 4-wire SPI.</li>
 </ul>
-<p>The <a href="../porting/#spi-port">porting</a> SPI port does the dummy read in <code>EnsureInitialized()</code> and again after a soft
-reset.</p>
+<p>The driver does that dummy read in <code>Init()</code> and again after a soft reset when the port declares
+<code>kInterface = Interface::Spi</code> (or declares nothing), see <a href="../porting/#what-you-implement">Porting</a>.</p>
 <h2 id="bus-settings">Bus settings<a class="headerlink" href="#bus-settings" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1518,8 +1518,8 @@ reset.</p>
 </table>
 <p>Two exceptions from the datasheet matter for a port:</p>
 <ul>
-<li>A write of the soft-reset command (CMD 0x7E = 0xB6) over I2C is <strong>not acknowledged</strong> (section 7.36). Treat it as
-  sent.</li>
+<li>A write of the soft-reset command (CMD 0x7E = 0xB6) over I2C is <strong>not acknowledged</strong> (section 7.36). The driver
+  expects that write to fail over I2C and confirms the reset by reading CHIP_ID, STATUS and INT_STATUS instead.</li>
 <li>After writing DRIVE_CONFIG, INT_CONFIG or the NVM data registers, keep CSB high for at least 1 µs before reading
   them back (section 5.5.4).</li>
 </ul>
@@ -1718,7 +1718,7 @@ at 30 Hz with high-resolution oversampling (Table 4).</p>
 </tr>
 <tr>
 <td><a href="https://github.com/boschsensortec/BMP5_SensorAPI">BMP5 Sensor API</a></td>
-<td>Bosch's C reference the driver's sequences follow (BSD-3, see <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/4f9b53474da429b4b66292e23b4a5ba6e3768350/THIRD_PARTY_NOTICES.md"><code>THIRD_PARTY_NOTICES.md</code></a>)</td>
+<td>Bosch's C reference the driver's sequences follow (BSD-3, see <a href="https://github.com/hardfoc/hf-bmp581-driver/blob/53ef827824bbdbdbeccbb6ec169b9068e8463ed5/THIRD_PARTY_NOTICES.md"><code>THIRD_PARTY_NOTICES.md</code></a>)</td>
 </tr>
 </tbody>
 </table>
