@@ -33,8 +33,11 @@ means a transfer failed or the chip did not confirm the step.
 ```
 
 `Init()` is safe to call again: it clears `ChipId()` first and fills it only on success. `SoftReset()` returns every
-register to its reset value, so call it before `Configure()`, never after. Over I2C the chip does not acknowledge the
-reset command; the port must count that write as sent ([Porting](porting.md#i2c-port)).
+register to its reset value, so call it before `Configure()`, never after. It writes CMD = 0xB6, waits 2 ms
+(t_soft_res), does the dummy read that selects SPI again on an SPI port, and then checks the reset as the datasheet
+recommends (section 4.3.9): CHIP_ID not 0, STATUS `nvm_rdy` = 1 and `nvm_err` = 0, INT_STATUS `por` = 1. Over I2C
+the chip does not acknowledge the reset command; the driver accepts that one missing ACK and reports every other
+failed transfer ([Porting](porting.md#what-you-implement)).
 
 ## Configure
 
@@ -104,11 +107,11 @@ standby-only registers in standby.
 | --- | --- | --- |
 | `NotInitialized` | `Init()` | Your port's `EnsureInitialized()` returned `false` |
 | `Bus` | any call | `ReadRegs()` or `WriteRegs()` returned `false` |
-| `InvalidChipId` | `Init()` | CHIP_ID read 0, or not `0x50` / `0x51` |
-| `NvmNotReady` | `Init()`, `ReadNvm()` | `nvm_rdy` clear or `nvm_err` set, after one soft-reset retry in `Init()` |
+| `InvalidChipId` | `Init()`, `SoftReset()` | CHIP_ID read 0, or (`Init()`) not `0x50` / `0x51` |
+| `NvmNotReady` | `Init()`, `SoftReset()`, `ReadNvm()` | `nvm_rdy` clear or `nvm_err` set, after one soft-reset retry in `Init()` |
 | `PorSoftReset` | `SoftReset()` | INT_STATUS `por` not set 2 ms after the reset command |
 | `NvmInvalidAddr` | `ReadNvm()` | Row outside `0x20`..`0x22` |
-| `NvmCommandError` | `Init()`, `ReadNvm()` | `nvm_cmd_err`: an NVM command outside standby |
+| `NvmCommandError` | `Init()`, `SoftReset()`, `ReadNvm()` | `nvm_cmd_err`: an NVM command outside standby |
 | `InvalidPowerMode` | `SetPowerMode()` | A value outside the `PowerMode` enum |
 
 `ToString(DriverError)` returns the enumerator's name for logs. [Troubleshooting](troubleshooting.md) maps

@@ -36,6 +36,26 @@ apps:
       - "INT_STATUS data-ready gating"
       - "Sensor-noise RMS with IIR bypassed"
 
+  bmp581_spi_example:
+    description: >-
+      BMP581 over SPI: init, verified soft reset with SPI re-selection,
+      100 Hz barometric preset, 1 Hz print — SPI2 CS=GPIO10 MOSI=GPIO11
+      SCLK=GPIO12 MISO=GPIO13, mode 0 @10 MHz
+    source_file: "bmp581_spi_example.cpp"
+    category: "example"
+    idf_versions: ["release/v5.5"]
+    build_types: ["Debug", "Release"]
+    ci_enabled: true
+    featured: false
+    hardware_required: true
+    features:
+      - >-
+        Template `hf_bmp581_examples::Bmp581EspIdfSpi` CRTP transport on
+        ESP-IDF `spi_master` (read bit 0x80, no write auto-increment)
+      - >-
+        `kInterface = Interface::Spi`: the driver's dummy read selects SPI
+        after power-up and after the soft reset
+
 build_config:
   build_types:
     Debug:

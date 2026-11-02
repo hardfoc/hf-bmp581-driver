@@ -28,6 +28,9 @@ template <i2c_port_t kPort, int kSdaGpio, int kSclGpio, std::uint8_t kAddr7 = bm
 class Bmp581EspIdfI2c
     : public bmp581::BusInterface<Bmp581EspIdfI2c<kPort, kSdaGpio, kSclGpio, kAddr7, kSpeedHz, kTimeoutMs>> {
 public:
+    /// I2C: the driver skips the SPI dummy read and accepts the soft-reset command's missing ACK.
+    static constexpr bmp581::Interface kInterface = bmp581::Interface::I2c;
+
     static esp_err_t Install() noexcept {
         i2c_config_t cfg = {};
         cfg.mode = I2C_MODE_MASTER;

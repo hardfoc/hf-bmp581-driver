@@ -20,17 +20,38 @@ int g_failures = 0;
         }                                                                              \
     } while (0)
 
-/// Register-map fake: writes land in regs[], reads come from regs[]; CMD is
-/// intercepted to emulate soft reset and NVM read enable.
-class FakeBus : public bmp581::BusInterface<FakeBus> {
+/// Register-map fake of the chip on its bus: writes land in regs[], reads come from regs[]; CMD is
+/// intercepted to emulate soft reset and NVM read enable. It also models what the datasheet says
+/// the bus does around a soft reset:
+///  - I2C wiring (`spi_wired == false`): the write of 0xB6 to CMD is not acknowledged, so the
+///    adapter reports it as failed (section 7.36), though the reset happens.
+///  - SPI wiring: the chip starts in I2C mode and returns to it after a soft reset; the first SPI
+///    transaction only switches it to SPI and its read data is invalid (section 5.1, Table 16).
+///  - The chip does not answer until t_soft_res (2 ms, Table 4) after the reset command.
+///  - INT_STATUS clears on read (section 7.21).
+/// `Self` sets the adapter type the driver sees, so each variant can declare `kInterface` or not.
+template <typename Self>
+class FakeBusBase : public bmp581::BusInterface<Self> {
 public:
     uint8_t regs[0x80]{};
     uint32_t delayed_us{0};
     std::vector<std::pair<uint8_t, uint8_t>> writes;
     bool fail_bus{false};
-    uint8_t status_after_reset{0xFF};  // 0xFF = leave STATUS unchanged on soft reset
+    uint8_t status_after_reset{0xFF};   // 0xFF = leave STATUS unchanged on soft reset
+    uint8_t chip_id_after_reset{0xFF};  // 0xFF = leave CHIP_ID unchanged on soft reset
+    bool por_after_reset{true};         // INT_STATUS.por set by the reset
+    bool spi_wired{false};              // false: I2C bus; true: SPI bus (I2C mode until selected)
+    bool spi_selected{false};           // SPI wiring: interface currently in SPI mode
+    bool reads_fail_after_reset{false}; // every read after a soft reset reports a bus error
+    int fail_read_reg{-1};              // reads starting at this register report a bus error
+    int fail_write_reg{-1};             // writes starting at this register report a bus error ...
+    int fail_write_skip{0};             // ... after this many of them succeeded
+    uint32_t busy_us{0};                // time left until the chip answers again after a reset
+    int reset_count{0};
+    int invalid_reads{0};               // reads answered with invalid data (SPI not selected)
+    int reads_after_reset{0};
 
-    FakeBus() {
+    FakeBusBase() {
         regs[bmp581::reg::kChipId] = bmp581::chip_id::kPrimary;
         regs[bmp581::reg::kStatus] = bmp581::status::kNvmRdy | bmp581::status::kCoreRdy;
         regs[bmp581::reg::kOdrConfig] = bmp581::odr_config::kDeepDisableMask;  // standby, deep disabled
@@ -40,31 +61,82 @@ public:
     }
 
     bool WriteRegs(uint8_t reg, const uint8_t* data, std::size_t len) noexcept {
-        if (fail_bus) return false;
+        if (fail_bus || busy_us > 0) return false;
+        if (reg == fail_write_reg && fail_write_skip-- <= 0) return false;
+        if (spi_wired && !spi_selected) {
+            spi_selected = true;  // this transaction selected SPI; its content is lost
+            return true;
+        }
+        bool acked = true;
         for (std::size_t i = 0; i < len; ++i) {
             const uint8_t r = static_cast<uint8_t>(reg + i);
             writes.emplace_back(r, data[i]);
             if (r == bmp581::reg::kCmd) {
                 if (data[i] == bmp581::cmd::kSoftReset) {
-                    regs[bmp581::reg::kIntStatus] |= bmp581::int_status::kPorSoftResetComplete;
-                    regs[bmp581::reg::kOdrConfig] = bmp581::odr_config::kDeepDisableMask;
-                    if (status_after_reset != 0xFF) {
-                        regs[bmp581::reg::kStatus] = status_after_reset;
-                    }
+                    Reset();
+                    acked = spi_wired;  // I2C: no ACK for the reset command
                 }
                 continue;
             }
             regs[r] = data[i];
         }
-        return true;
+        return acked;
     }
     bool ReadRegs(uint8_t reg, uint8_t* out, std::size_t len) noexcept {
-        if (fail_bus) return false;
+        if (fail_bus || busy_us > 0 || reg == fail_read_reg) return false;
+        if (reset_count > 0) {
+            ++reads_after_reset;
+            if (reads_fail_after_reset) return false;
+        }
+        if (spi_wired && !spi_selected) {
+            spi_selected = true;
+            ++invalid_reads;
+            std::memset(out, 0x00, len);  // invalid data
+            return true;
+        }
         std::memcpy(out, &regs[reg], len);
+        if (reg <= bmp581::reg::kIntStatus && reg + len > bmp581::reg::kIntStatus) {
+            regs[bmp581::reg::kIntStatus] = 0;  // clear-on-read
+        }
         return true;
     }
-    void DelayUs(uint32_t us) noexcept { delayed_us += us; }
+    void DelayUs(uint32_t us) noexcept {
+        delayed_us += us;
+        busy_us = us >= busy_us ? 0 : busy_us - us;
+    }
     bool EnsureInitialized() noexcept { return true; }
+
+private:
+    void Reset() noexcept {
+        ++reset_count;
+        busy_us = bmp581::timing::kSoftResetUs;
+        spi_selected = false;
+        regs[bmp581::reg::kIntStatus] =
+            por_after_reset ? bmp581::int_status::kPorSoftResetComplete : 0;
+        regs[bmp581::reg::kOdrConfig] = bmp581::odr_config::kDeepDisableMask;
+        if (status_after_reset != 0xFF) {
+            regs[bmp581::reg::kStatus] = status_after_reset;
+        }
+        if (chip_id_after_reset != 0xFF) {
+            regs[bmp581::reg::kChipId] = chip_id_after_reset;
+        }
+    }
+};
+
+/// Adapter that does not declare its interface (the original contract).
+class FakeBus : public FakeBusBase<FakeBus> {};
+
+/// Adapter that declares I2C.
+class FakeI2c : public FakeBusBase<FakeI2c> {
+public:
+    static constexpr bmp581::Interface kInterface = bmp581::Interface::I2c;
+};
+
+/// Adapter that declares SPI; the chip behind it is wired for SPI.
+class FakeSpi : public FakeBusBase<FakeSpi> {
+public:
+    static constexpr bmp581::Interface kInterface = bmp581::Interface::Spi;
+    FakeSpi() { spi_wired = true; }
 };
 
 void TestInitAndReset() {
@@ -101,6 +173,166 @@ void TestInitAndReset() {
     off.fail_bus = true;
     bmp581::Driver<FakeBus> doff(off);
     CHECK(doff.Init().error == bmp581::DriverError::Bus);
+}
+
+// Soft reset over I2C: the chip does not acknowledge the write of 0xB6 to CMD (section 7.36), so
+// the adapter reports that one write as failed. SoftReset() must accept it, wait t_soft_res and
+// verify the reset by reading CHIP_ID, STATUS and INT_STATUS (section 4.3.9).
+template <typename Bus>
+void CheckSoftResetOverI2c(int expected_reads) {
+    Bus bus;
+    bmp581::Driver<Bus> dev(bus);
+    CHECK(dev.Init().ok());
+    const uint32_t before = bus.delayed_us;
+    const auto r = dev.SoftReset();
+    CHECK(r.ok());
+    CHECK(r.error == bmp581::DriverError::None);
+    CHECK(bus.reset_count == 1);
+    CHECK(bus.delayed_us - before >= bmp581::timing::kSoftResetUs);
+    CHECK(bus.reads_after_reset == expected_reads);
+    CHECK(bus.invalid_reads == 0);
+    CHECK(bus.regs[bmp581::reg::kIntStatus] == 0);  // por was read (and cleared)
+}
+
+void TestSoftResetI2cNack() {
+    CheckSoftResetOverI2c<FakeI2c>(3);  // CHIP_ID, STATUS, INT_STATUS
+    CheckSoftResetOverI2c<FakeBus>(4);  // undeclared interface: plus the SPI-selecting dummy read
+}
+
+// The reset is verified per section 4.3.9: CHIP_ID not 0, STATUS nvm_rdy = 1 and nvm_err = 0,
+// INT_STATUS por = 1.
+void TestSoftResetVerifies() {
+    {
+        FakeI2c bus;
+        bus.chip_id_after_reset = 0x00;
+        bmp581::Driver<FakeI2c> dev(bus);
+        CHECK(dev.SoftReset().error == bmp581::DriverError::InvalidChipId);
+    }
+    {
+        FakeI2c bus;
+        bus.status_after_reset = bmp581::status::kCoreRdy;  // nvm_rdy = 0
+        bmp581::Driver<FakeI2c> dev(bus);
+        CHECK(dev.SoftReset().error == bmp581::DriverError::NvmNotReady);
+    }
+    {
+        FakeI2c bus;
+        bus.status_after_reset = bmp581::status::kNvmRdy | bmp581::status::kNvmErr;
+        bmp581::Driver<FakeI2c> dev(bus);
+        CHECK(dev.SoftReset().error == bmp581::DriverError::NvmNotReady);
+    }
+    {
+        FakeI2c bus;
+        bus.por_after_reset = false;
+        bmp581::Driver<FakeI2c> dev(bus);
+        CHECK(dev.SoftReset().error == bmp581::DriverError::PorSoftReset);
+    }
+}
+
+// Only the missing ACK of the reset write is tolerated: a failed read after the reset, a dead
+// bus, and a failed reset write on SPI (which has no ACK to miss) are all reported as Bus.
+void TestSoftResetBusErrors() {
+    {
+        FakeI2c bus;
+        bus.reads_fail_after_reset = true;
+        bmp581::Driver<FakeI2c> dev(bus);
+        CHECK(dev.SoftReset().error == bmp581::DriverError::Bus);
+    }
+    {
+        FakeBus bus;
+        bus.reads_fail_after_reset = true;
+        bmp581::Driver<FakeBus> dev(bus);
+        CHECK(dev.SoftReset().error == bmp581::DriverError::Bus);
+    }
+    {
+        FakeI2c bus;
+        bus.fail_bus = true;
+        bmp581::Driver<FakeI2c> dev(bus);
+        CHECK(dev.SoftReset().error == bmp581::DriverError::Bus);
+    }
+    {
+        FakeSpi bus;
+        bmp581::Driver<FakeSpi> dev(bus);
+        CHECK(dev.Init().ok());
+        bus.fail_bus = true;
+        CHECK(dev.SoftReset().error == bmp581::DriverError::Bus);
+        CHECK(bus.reset_count == 0);
+    }
+    {
+        FakeSpi bus;
+        bus.reads_fail_after_reset = true;
+        bmp581::Driver<FakeSpi> dev(bus);
+        CHECK(dev.Init().ok());
+        CHECK(dev.SoftReset().error == bmp581::DriverError::Bus);
+    }
+}
+
+// SPI: the chip is in I2C mode after power-up and after a soft reset; one dummy read selects SPI
+// and returns invalid data (section 5.1, Table 16). The driver does the dummy read itself.
+template <typename Bus>
+void CheckSpiReentry() {
+    Bus bus;
+    bus.spi_wired = true;
+    bmp581::Driver<Bus> dev(bus);
+    CHECK(dev.Init().ok());  // first access after power-up selects SPI
+    CHECK(dev.ChipId() == bmp581::chip_id::kPrimary);
+    CHECK(bus.invalid_reads == 1);
+    CHECK(dev.SoftReset().ok());
+    CHECK(bus.reset_count == 1);
+    CHECK(bus.invalid_reads == 2);  // the dummy read after the reset
+    CHECK(bus.spi_selected);
+    CHECK(bus.regs[bmp581::reg::kIntStatus] == 0);  // por was read from the chip, not the dummy
+    const auto id = dev.ReadRegister(bmp581::reg::kChipId);
+    CHECK(id.ok() && id.value == bmp581::chip_id::kPrimary);
+    CHECK(dev.Configure(bmp581::BarometricReferencePreset()).ok());
+    CHECK(dev.GetPowerMode().value == bmp581::PowerMode::Normal);
+}
+
+void TestSoftResetSpiReentry() {
+    CheckSpiReentry<FakeSpi>();
+    CheckSpiReentry<FakeBus>();  // undeclared interface on an SPI bus
+}
+
+// Init()'s recovery reset for a part whose NVM boot did not finish must run over I2C, where the
+// reset write is not acknowledged.
+void TestInitColdNvmOverI2c() {
+    FakeI2c bus;
+    bus.regs[bmp581::reg::kStatus] = 0x00;
+    bus.status_after_reset = bmp581::status::kNvmRdy | bmp581::status::kCoreRdy;
+    bmp581::Driver<FakeI2c> dev(bus);
+    CHECK(dev.Init().ok());
+    CHECK(bus.reset_count == 1);
+    CHECK(bus.delayed_us >= bmp581::timing::kSoftResetUs);
+}
+
+// Reads the driver used to drop: their bus errors reach the caller.
+void TestDroppedReadsPropagate() {
+    {
+        FakeBus bus;
+        bus.fail_read_reg = bmp581::reg::kIntStatus;
+        bmp581::Driver<FakeBus> dev(bus);
+        CHECK(dev.ConfigureInterrupt(bmp581::InterruptConfig{}).error == bmp581::DriverError::Bus);
+    }
+    {
+        FakeBus bus;  // standby with deep_dis = 0: the driver reads FIFO_SEL, OSR/ODR and DSP
+        bus.regs[bmp581::reg::kOdrConfig] = 0x00;
+        bus.fail_read_reg = bmp581::reg::kFifoSel;
+        bmp581::Driver<FakeBus> dev(bus);
+        CHECK(dev.GetPowerMode().error == bmp581::DriverError::Bus);
+        bus.fail_read_reg = bmp581::reg::kDspConfig;
+        CHECK(dev.GetPowerMode().error == bmp581::DriverError::Bus);
+        bus.fail_read_reg = -1;
+        bus.regs[bmp581::reg::kOdrConfig] = static_cast<uint8_t>(0x1C << 2);  // 1 Hz, deep standby
+        const auto m = dev.GetPowerMode();
+        CHECK(m.ok() && m.value == bmp581::PowerMode::DeepStandby);
+    }
+    {
+        FakeBus bus;  // ReadNvm() from normal mode must report a failed mode restore
+        bus.regs[bmp581::reg::kOdrConfig] = 0x81;
+        bmp581::Driver<FakeBus> dev(bus);
+        bus.fail_write_reg = bmp581::reg::kOdrConfig;
+        bus.fail_write_skip = 1;  // the hop to standby succeeds, the restore to normal fails
+        CHECK(dev.ReadNvm(0x21).error == bmp581::DriverError::Bus);
+    }
 }
 
 void TestPowerModes() {
@@ -190,6 +422,26 @@ void TestInterruptsAndSample() {
     CHECK(rs.ok() && rs.value.pressure_raw == 6484800U);
 }
 
+// INT_CONFIG (0x14) layout, datasheet section 7.5: int_mode 0, int_pol 1, int_od 2, int_en 3,
+// pad_int_drv 7:4. The fields must tile the register with no gap or overlap.
+void TestIntConfigFields() {
+    namespace ic = bmp581::int_config;
+    CHECK(ic::kPadDriveMask == 0xF0);
+    CHECK((ic::kPadDriveMask >> ic::kPadDriveShift) == 0x0F);
+    constexpr uint8_t kLowFields = ic::kModeMask | ic::kPolMask | ic::kOdMask | ic::kEnableMask;
+    CHECK((kLowFields | ic::kPadDriveMask) == 0xFF);
+    CHECK((ic::kPadDriveMask & kLowFields) == 0);
+
+    // ConfigureInterrupt() leaves the whole pad_int_drv field as it found it.
+    FakeBus bus;
+    bus.regs[bmp581::reg::kIntConfig] = 0xF0;
+    bmp581::Driver<FakeBus> dev(bus);
+    bmp581::InterruptConfig cfg{};
+    cfg.enable = true;
+    CHECK(dev.ConfigureInterrupt(cfg).ok());
+    CHECK((bus.regs[bmp581::reg::kIntConfig] & ic::kPadDriveMask) == 0xF0);
+}
+
 void TestNvm() {
     FakeBus bus;
     bmp581::Driver<FakeBus> dev(bus);
@@ -220,9 +472,16 @@ void TestPreset() {
 
 int main() {
     TestInitAndReset();
+    TestSoftResetI2cNack();
+    TestSoftResetVerifies();
+    TestSoftResetBusErrors();
+    TestSoftResetSpiReentry();
+    TestInitColdNvmOverI2c();
+    TestDroppedReadsPropagate();
     TestPowerModes();
     TestOsrOdrIir();
     TestInterruptsAndSample();
+    TestIntConfigFields();
     TestNvm();
     TestPreset();
     if (g_failures == 0) {

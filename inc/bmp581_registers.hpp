@@ -115,7 +115,8 @@ constexpr uint8_t kModeMask = 0x01;      ///< 0 pulsed, 1 latched
 constexpr uint8_t kPolMask = 0x02;       ///< 0 active-low, 1 active-high
 constexpr uint8_t kOdMask = 0x04;        ///< 0 push-pull, 1 open-drain
 constexpr uint8_t kEnableMask = 0x08;
-constexpr uint8_t kPadDriveMask = 0x70;
+constexpr uint8_t kPadDriveMask = 0xF0;  ///< pad_int_drv, bits 7:4 (datasheet section 7.5)
+constexpr uint8_t kPadDriveShift = 4;
 }  // namespace int_config
 
 /// OSR_CONFIG (0x36) fields.

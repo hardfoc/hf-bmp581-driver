@@ -31,6 +31,7 @@ set(MAIN_REQUIRES
     driver
     freertos
     esp_driver_i2c
+    esp_driver_spi
     hf_bmp581
 )
 

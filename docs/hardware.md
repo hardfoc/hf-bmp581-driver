@@ -32,8 +32,8 @@ The sensor chooses its interface from CSB, not from a strap (datasheet section 5
   power-down or soft reset. That transaction's data is invalid: do one dummy read first.
 - 3-wire SPI is selected by `DRIVE_CONFIG.spi3_en = 1`, written over 4-wire SPI.
 
-The [porting](porting.md#spi-port) SPI port does the dummy read in `EnsureInitialized()` and again after a soft
-reset.
+The driver does that dummy read in `Init()` and again after a soft reset when the port declares
+`kInterface = Interface::Spi` (or declares nothing), see [Porting](porting.md#what-you-implement).
 
 ## Bus settings
 
@@ -48,8 +48,8 @@ reset.
 
 Two exceptions from the datasheet matter for a port:
 
-- A write of the soft-reset command (CMD 0x7E = 0xB6) over I2C is **not acknowledged** (section 7.36). Treat it as
-  sent.
+- A write of the soft-reset command (CMD 0x7E = 0xB6) over I2C is **not acknowledged** (section 7.36). The driver
+  expects that write to fail over I2C and confirms the reset by reading CHIP_ID, STATUS and INT_STATUS instead.
 - After writing DRIVE_CONFIG, INT_CONFIG or the NVM data registers, keep CSB high for at least 1 µs before reading
   them back (section 5.5.4).
 

@@ -15,7 +15,7 @@ bool bring_up(Driver& dev) {
     std::printf("init: %s\n", bmp581::ToString(init.error).data());
     return false;
   }
-  const auto reset = dev.SoftReset();       // CMD 0xB6, 2 ms, INT_STATUS.por checked
+  const auto reset = dev.SoftReset();       // CMD 0xB6, 2 ms, then CHIP_ID, STATUS, INT_STATUS.por
   if (!reset) {
     std::printf("soft reset: %s\n", bmp581::ToString(reset.error).data());
     return false;
@@ -118,7 +118,7 @@ const char* advice(bmp581::DriverError e) {
     case bmp581::DriverError::None:            return "ok";
     case bmp581::DriverError::NotInitialized:  return "EnsureInitialized() failed: bring the bus up";
     case bmp581::DriverError::Bus:             return "a transfer failed: wiring, address, pull-ups";
-    case bmp581::DriverError::InvalidChipId:   return "not a BMP581, or the first SPI read";
+    case bmp581::DriverError::InvalidChipId:   return "not a BMP581, or SPI read in I2C mode";
     case bmp581::DriverError::NvmNotReady:     return "NVM boot not finished or NVM error";
     case bmp581::DriverError::PorSoftReset:    return "reset not confirmed by INT_STATUS.por";
     case bmp581::DriverError::NvmInvalidAddr:  return "NVM user rows are 0x20..0x22";

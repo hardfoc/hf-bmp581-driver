@@ -28,6 +28,21 @@ to allocate.
 
 All four must be `noexcept`-compatible: the driver's calls are `noexcept`.
 
+Declare the bus as well, so the driver handles the two steps that depend on it:
+
+```cpp
+static constexpr bmp581::Interface kInterface = bmp581::Interface::I2c;  // or Interface::Spi
+```
+
+| `kInterface` | Soft-reset write not acknowledged | SPI dummy read in `Init()` and after `SoftReset()` |
+| --- | --- | --- |
+| `Interface::I2c` | Accepted (I2C has no ACK for it, datasheet section 7.36) | Not done |
+| `Interface::Spi` | Reported as `Bus` (SPI has no ACK to miss) | Done |
+| Not declared | Accepted | Done (harmless over I2C) |
+
+Every other failed transfer is reported as `Bus`, including the reads that verify a soft reset. A port does not
+need to special-case the reset command or track the interface mode itself.
+
 ## I2C port
 
 ```cpp title="my_i2c.hpp"
@@ -38,9 +53,9 @@ Rules the transfer must follow:
 
 - **One transaction per call.** A write is START, address, register, data, STOP. A read is START, address,
   register, repeated START (or STOP and START), address, data, STOP.
-- **Count a soft reset as sent.** The chip does not acknowledge the data byte when CMD (0x7E) is written with 0xB6
-  (datasheet section 7.36). If your SDK reports the missing acknowledge as an error and the port passes it on,
-  `SoftReset()` returns `Bus` and `Init()` cannot recover a part whose NVM boot did not finish.
+- **Report every missing acknowledge.** The chip does not acknowledge the soft-reset command (CMD 0x7E = 0xB6,
+  datasheet section 7.36); the driver expects that one write to fail over I2C and verifies the reset by reading
+  instead. Do not hide it in the port.
 - **Do not let SDO float.** It sets the address bit; floating, the address is undefined.
 
 ## SPI port
@@ -55,8 +70,8 @@ Rules the transfer must follow:
 - **Writes do not auto-increment.** Send an address byte (bit 7 clear) before every data byte, as the datasheet's
   burst-write figure shows. The driver writes two consecutive registers in `SetOsrOdr()` and `SetIir()`.
 - **Reads set bit 7** of the address and return data from the next byte on, with auto-increment.
-- **Select SPI with a dummy read** after power-up and after every soft reset: both return the chip to I2C mode, and
-  the read that switches it returns invalid data.
+- **Declare `kInterface = Interface::Spi`.** Power-up and every soft reset return the chip to I2C mode; the driver
+  then does the dummy read that selects SPI (its data is invalid), in `Init()` and in `SoftReset()`.
 
 === "I2C"
 
@@ -76,14 +91,17 @@ Rules the transfer must follow:
 
 The ESP32 examples use [`hf_bmp581_esp_i2c.hpp`](../examples/esp32/main/include/hf_bmp581_esp_i2c.hpp):
 `Bmp581EspIdfI2c<port, sda, scl, address, speed>`, an I2C port on the legacy ESP-IDF `driver/i2c.h` API with
-FreeRTOS delays. Start from it for any ESP-IDF target, and add the soft-reset exception above.
+FreeRTOS delays. [`hf_bmp581_esp_spi.hpp`](../examples/esp32/main/include/hf_bmp581_esp_spi.hpp) is the SPI
+counterpart, `Bmp581EspIdfSpi<host, mosi, miso, sclk, cs, clock, mode>` on the ESP-IDF `spi_master` driver (mode 0
+or 3, at most 12 MHz, checked at compile time). Start from one of them for any ESP-IDF target.
 
 ## Check your port
 
 1. Build it: both ports on this page are compiled by the host CI from [`tests/docs/`](../tests/docs/my_i2c.hpp),
    with the driver instantiated over them.
 2. Call `Init()` and print `ChipId()`: `0x50` proves register reads end to end.
-3. Call `SoftReset()`: `ok()` proves the CMD write, the reset wait and (on SPI) the dummy read.
+3. Call `SoftReset()`: `ok()` proves the CMD write, the reset wait, (on SPI) the dummy read and the reads that
+   verify the reset (CHIP_ID, STATUS, INT_STATUS).
 4. Call `Configure()`, then `GetOsrOdr()`: reading back what you wrote proves two-byte writes.
 5. Read a few samples: about 101 kPa at sea level, falling by about 12 Pa per metre of height.
 

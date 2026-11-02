@@ -16,6 +16,9 @@ void platform_delay_us(uint32_t us) noexcept;
 // --8<-- [start:port]
 class MySpi : public bmp581::BusInterface<MySpi> {
 public:
+  // Tells the driver to select SPI with a dummy read after power-up and after a soft reset.
+  static constexpr bmp581::Interface kInterface = bmp581::Interface::Spi;
+
   // SPI writes do not auto-increment: send one (address, data) pair per byte, bit 7 clear.
   bool WriteRegs(uint8_t reg, const uint8_t* data, std::size_t len) noexcept {
     uint8_t tx[16];
@@ -27,15 +30,7 @@ public:
       tx[2 * i] = static_cast<uint8_t>((reg + i) & 0x7FU);
       tx[2 * i + 1] = data[i];
     }
-    if (!platform_spi_transfer(tx, rx, 2 * len)) {
-      return false;
-    }
-    if (reg == bmp581::reg::kCmd && data[0] == bmp581::cmd::kSoftReset) {
-      // A soft reset returns the interface to I2C mode; one dummy read selects SPI again.
-      platform_delay_us(bmp581::timing::kSoftResetUs);
-      return DummyRead();
-    }
-    return true;
+    return platform_spi_transfer(tx, rx, 2 * len);
   }
 
   // Reads: address with bit 7 set, then the data bytes (auto-increment); no dummy byte.
@@ -57,21 +52,7 @@ public:
 
   void DelayUs(uint32_t us) noexcept { platform_delay_us(us); }
 
-  // The chip powers up in I2C mode. The first SPI read switches it to SPI; its data is invalid.
-  bool EnsureInitialized() noexcept {
-    if (!spi_selected_) {
-      spi_selected_ = DummyRead();
-    }
-    return spi_selected_;
-  }
-
-private:
-  bool DummyRead() noexcept {
-    uint8_t tx[2] = {static_cast<uint8_t>(bmp581::reg::kChipId | 0x80U), 0};
-    uint8_t rx[2] = {};
-    return platform_spi_transfer(tx, rx, sizeof(tx));
-  }
-
-  bool spi_selected_ = false;
+  // Called before every Init(); bring the bus up here if your SDK needs it.
+  bool EnsureInitialized() noexcept { return true; }
 };
 // --8<-- [end:port]
