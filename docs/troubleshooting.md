@@ -1,36 +1,48 @@
 # Troubleshooting
 
-## `InvalidChipId`
+Symptoms you may see while bringing up a BMP581, their causes and the fix for each, cheapest check first.
 
-- Wrong address (0x46 vs 0x47 — SDO level) or a different part on the bus.
-- SPI: the first read after power-up can be invalid; issue a dummy read or call `Init()` twice.
+Start with the `DriverError` of the failing call (`ToString(r.error)`): `Bus` and `NotInitialized` are transport
+problems; the others mean the chip answered but did not confirm a step.
 
-## `NvmNotReady` on `Init()`
+## `Init()` fails
 
-Power-up not complete (~3 ms) or a genuine NVM error. `Init()` already issues
-one soft reset and re-checks when it sees `STATUS == 0` with a valid chip id —
-observed on a BMP581 breakout whose NVM boot had not completed after power-up.
-If `nvm_err` persists after that, the part is faulty.
+| Error | Cause | Fix |
+| --- | --- | --- |
+| `NotInitialized` | Your port's `EnsureInitialized()` returned `false` | Install or open the bus before `Init()` |
+| `Bus` | No acknowledge at the address, or a dead bus | Address from SDO (0x46 low, 0x47 high), pull-ups to VDDIO, CSB tied to VDDIO for I2C |
+| `InvalidChipId` | Another part at that address, SDO floating, or the first SPI read after power-up | Check the address; on SPI do one dummy read before `Init()` ([Porting](porting.md#spi-port)) |
+| `NvmNotReady` | The NVM had not loaded, or `nvm_err` is set | `Init()` already soft-resets once when STATUS reads 0. Wait at least 2 ms (t_powup) after power-up; if it persists, the part is faulty |
+| `NvmCommandError` | `nvm_cmd_err` left over from an earlier NVM command | Soft reset, then `Init()` again |
 
-## `PorSoftReset`
+## `SoftReset()` fails
 
-INT_STATUS did not report `por_softreset_complete` 2 ms after CMD 0xB6. Check
-that the bus is not stuck and that nothing else read INT_STATUS in between
-(reading clears it in pulsed mode).
+| Error | Cause | Fix |
+| --- | --- | --- |
+| `Bus` over I2C | The chip does not acknowledge the reset command and your port reports it | Count the write of 0xB6 to CMD as sent ([Porting](porting.md#i2c-port)) |
+| `PorSoftReset` over SPI | The reset returned the chip to I2C mode, so the INT_STATUS read was the invalid switching read | Do a dummy read after the reset in the port |
+| `PorSoftReset` | Something else read INT_STATUS in between (reading clears it) | Do not poll INT_STATUS from another task during the reset |
 
-## `odr_valid == false`
+## Readings
 
-The OSR pair cannot be completed within the ODR period; the device lowered the
-effective OSR. Reduce OSR or ODR (see the data-sheet OSR/ODR table).
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| The values never change | The chip is in standby or deep standby | Check the result of `Configure()` or `SetPowerMode(PowerMode::Normal)` |
+| One new value, then nothing | Forced mode: one conversion, then standby | Set forced mode again per sample, or use normal mode |
+| `DataReady()` never turns `true` | Another reader clears INT_STATUS first, or the chip is not converting | Read INT_STATUS in one place only; check the power mode |
+| Pressure reads 0 | Pressure disabled (`pressure_enable = false`) or `ReadSample(false)` | Enable pressure in `OsrOdrConfig` |
+| `odr_valid` is `false` | The oversampling pair does not fit the ODR period; the chip runs with ×1 / ×1 or ×2 / ×2 | Lower the oversampling or the ODR ([Register interface](register-interface.md#oversampling-and-data-rate)) |
+| Noisy pressure | Low oversampling, or air movement | Raise pressure oversampling, enable the IIR filter (`SetIir()`), shield the port from drafts |
+| Offset of tens of pascals | Solder drift (±30 Pa) or self-heating | Compare against a reference once after assembly; keep the sensor away from warm parts |
 
-## Readings do not change
+## SPI only
 
-- Power mode still Standby — call `SetPowerMode(Normal)` or `Configure()`.
-- Forced mode gives one sample then returns to standby by design.
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Two-byte settings come back wrong | The port sends `[reg] [d0] [d1]`; SPI writes do not auto-increment | Send one address byte before each data byte |
+| Every read is shifted by one byte | The port drops a "dummy" byte the BMP581 does not send | Take data from the byte right after the address |
+| Works until the first soft reset | A soft reset selects I2C again | Dummy read after the reset |
 
-## Noisy pressure
+## Next
 
-Raise pressure OSR, enable IIR (`SetIir`), or average on the host. Remember
-IIR is standby-only to write; the driver handles the hop.
-
-**Back:** [Documentation home →](index.md)
+[Hardware](hardware.md) has the pins and bus settings; [Porting](porting.md) the transport rules.

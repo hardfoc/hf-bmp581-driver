@@ -62,7 +62,7 @@ bool one_shot(Driver& dev, MyI2c& bus, bmp581::Sample& out) {
   if (!dev.SetPowerMode(bmp581::PowerMode::Forced)) {   // one conversion, then back to standby
     return false;
   }
-  bus.DelayUs(bmp581::timing::kStartupUs + 6000);       // start-up plus OSR x8 / x1 conversion time
+  bus.DelayUs(bmp581::timing::kStartupUs + 7000U);      // t_startup + conversion at OSR x8 / x1 (6.4 ms)
   const auto s = dev.ReadSample();
   if (!s) {
     return false;

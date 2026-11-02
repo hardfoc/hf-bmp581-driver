@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="909" viewBox="0 0 1200 909" role="img" aria-labelledby="driver-layers-title driver-layers-desc" font-family="Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+<title id="driver-layers-title">Three layers, one of them yours</title>
+<desc id="driver-layers-desc">Layer diagram: the application calls the hardware-agnostic BMP581 driver, which reads and writes registers through the CRTP register transport, which calls the platform port you write, which drives the I2C or SPI bus of the BMP581.</desc>
+<defs><marker id="fk-arrow-rail" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8893A2"/></marker></defs>
+<rect x="0.5" y="0.5" width="1199" height="908" rx="16" fill="#FFFFFF" stroke="#E2E7EE"/>
+<text x="32" y="46.8" font-size="16" font-weight="700" letter-spacing="1.2" fill="#3730A3">ARCHITECTURE</text>
+<text x="32" y="85.6" font-size="32" font-weight="700" fill="#17202C">Three layers, one of them yours</text>
+<text x="32" y="115.4" font-size="18" fill="#566070">The driver and the transport are the same on every MCU. The port is a small class with four methods.</text>
+<rect x="32" y="131.4" width="1136" height="1" fill="#E2E7EE"/>
+<rect x="32" y="278.4" width="1136" height="157" rx="16" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1.2"/>
+<path d="M600 242.4 L600 274.4" fill="none" stroke="#8893A2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#fk-arrow-rail)"/>
+<path d="M600 439.4 L600 471.4" fill="none" stroke="#8893A2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#fk-arrow-rail)"/>
+<path d="M600 593.4 L600 625.4" fill="none" stroke="#8893A2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#fk-arrow-rail)"/>
+<path d="M600 721.4 L600 753.4" fill="none" stroke="#8893A2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#fk-arrow-rail)"/>
+<rect x="32" y="149.4" width="1136" height="89" rx="12" fill="#FFFFFF" stroke="#C9D1DB" stroke-width="1"/>
+<rect x="32" y="157.4" width="4" height="73" rx="2" fill="#64748B"/>
+<rect x="32" y="475.4" width="1136" height="114" rx="12" fill="#EEF0FF" stroke="#4F46E5" stroke-width="1.4"/>
+<rect x="32" y="483.4" width="4" height="98" rx="2" fill="#4F46E5"/>
+<rect x="32" y="629.4" width="1136" height="88" rx="12" fill="#E6F6F4" stroke="#0F8B80" stroke-width="1.4"/>
+<rect x="32" y="637.4" width="4" height="72" rx="2" fill="#0F8B80"/>
+<rect x="32" y="757.4" width="1136" height="89" rx="12" fill="#FFFFFF" stroke="#C9D1DB" stroke-width="1"/>
+<rect x="32" y="765.4" width="4" height="73" rx="2" fill="#64748B"/>
+<text x="56" y="184.4" font-size="20" font-weight="700" fill="#17202C">Your application</text>
+<text x="56" y="215" font-size="17" fill="#2B3442">altitude, air-density compensation, weather station ...</text>
+<rect x="48" y="323.4" width="82.6" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="56" y="341.5" font-size="16" font-weight="700" fill="#3730A3">ChipId()</text>
+<rect x="138.6" y="323.4" width="109.1" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="146.6" y="341.5" font-size="16" font-weight="700" fill="#3730A3">Initialized()</text>
+<rect x="255.7" y="323.4" width="54.9" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="263.7" y="341.5" font-size="16" font-weight="700" fill="#3730A3">Init()</text>
+<rect x="318.6" y="323.4" width="110.3" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="326.6" y="341.5" font-size="16" font-weight="700" fill="#3730A3">SoftReset()</text>
+<rect x="436.9" y="323.4" width="111.9" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="444.9" y="341.5" font-size="16" font-weight="700" fill="#3730A3">Configure()</text>
+<rect x="556.8" y="323.4" width="157.6" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="564.8" y="341.5" font-size="16" font-weight="700" fill="#3730A3">GetPowerMode()</text>
+<rect x="722.5" y="323.4" width="156" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="730.5" y="341.5" font-size="16" font-weight="700" fill="#3730A3">SetPowerMode()</text>
+<rect x="886.5" y="323.4" width="118" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="894.5" y="341.5" font-size="16" font-weight="700" fill="#3730A3">GetOsrOdr()</text>
+<rect x="1012.5" y="323.4" width="116.3" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="1020.5" y="341.5" font-size="16" font-weight="700" fill="#3730A3">SetOsrOdr()</text>
+<rect x="48" y="357.4" width="162.3" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="56" y="375.5" font-size="16" font-weight="700" fill="#3730A3">GetEffectiveOsr()</text>
+<rect x="218.3" y="357.4" width="74.1" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="226.3" y="375.5" font-size="16" font-weight="700" fill="#3730A3">GetIir()</text>
+<rect x="300.4" y="357.4" width="72.5" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="308.4" y="375.5" font-size="16" font-weight="700" fill="#3730A3">SetIir()</text>
+<rect x="380.8" y="357.4" width="184.8" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="388.8" y="375.5" font-size="16" font-weight="700" fill="#3730A3">ConfigureInterrupt()</text>
+<rect x="573.7" y="357.4" width="222.3" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="581.7" y="375.5" font-size="16" font-weight="700" fill="#3730A3">SelectInterruptSources()</text>
+<rect x="804" y="357.4" width="196.9" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="812" y="375.5" font-size="16" font-weight="700" fill="#3730A3">ReadInterruptStatus()</text>
+<rect x="1008.9" y="357.4" width="118.9" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="1016.9" y="375.5" font-size="16" font-weight="700" fill="#3730A3">DataReady()</text>
+<rect x="48" y="391.4" width="132.4" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="56" y="409.5" font-size="16" font-weight="700" fill="#3730A3">ReadSample()</text>
+<rect x="188.4" y="391.4" width="154.1" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="196.4" y="409.5" font-size="16" font-weight="700" fill="#3730A3">DecodeSample()</text>
+<rect x="350.5" y="391.4" width="109.1" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="358.5" y="409.5" font-size="16" font-weight="700" fill="#3730A3">ReadNvm()</text>
+<rect x="467.7" y="391.4" width="139.8" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="475.7" y="409.5" font-size="16" font-weight="700" fill="#3730A3">ReadRegister()</text>
+<rect x="615.5" y="391.4" width="143.5" height="26" rx="13" fill="#EEF0FF" stroke="#C7CBF8" stroke-width="1"/>
+<text x="623.5" y="409.5" font-size="16" font-weight="700" fill="#3730A3">WriteRegister()</text>
+<text x="48" y="307.4" font-size="17" font-weight="700" fill="#3730A3">HARDWARE-AGNOSTIC CORE</text>
+<text x="326.2" y="307.4" font-size="16" fill="#3730A3">bmp581::Driver&lt;Bus&gt;, inc/bmp581_driver.hpp</text>
+<text x="56" y="510.4" font-size="20" font-weight="700" fill="#3730A3">Register transport</text>
+<text x="56" y="541" font-size="17" fill="#2B3442">BusInterface&lt;Bus&gt;: CRTP base, no virtual calls; register map and bit fields in</text>
+<text x="56" y="565.7" font-size="17" fill="#2B3442">bmp581_registers.hpp, results and configuration in bmp581_types.hpp</text>
+<text x="56" y="664.4" font-size="20" font-weight="700" fill="#115E59">Platform port (your class)</text>
+<text x="56" y="693.6" font-size="16" font-family="'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace" fill="#2B3442">WriteRegs()  ReadRegs()  DelayUs()  EnsureInitialized()</text>
+<text x="56" y="792.4" font-size="20" font-weight="700" fill="#17202C">BMP581</text>
+<text x="56" y="823" font-size="17" fill="#2B3442">I2C up to 1 MHz at 0x46 / 0x47, or SPI mode 0 / 3 up to 12 MHz  /  INT</text>
+<rect x="32" y="858.8" width="14" height="14" rx="4" fill="#EEF0FF" stroke="#4F46E5" stroke-width="1.4"/>
+<text x="54" y="873.4" font-size="16" fill="#566070">this library</text>
+<rect x="161.8" y="858.8" width="14" height="14" rx="4" fill="#E6F6F4" stroke="#0F8B80" stroke-width="1.4"/>
+<text x="183.8" y="873.4" font-size="16" fill="#566070">you write</text>
+<rect x="282.1" y="858.8" width="14" height="14" rx="4" fill="#F1F4F8" stroke="#64748B" stroke-width="1.4"/>
+<text x="304.1" y="873.4" font-size="16" fill="#566070">hardware</text>
+</svg>

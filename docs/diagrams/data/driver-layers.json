@@ -1,0 +1,35 @@
+{
+  "calls": [
+    "ChipId",
+    "Initialized",
+    "Init",
+    "SoftReset",
+    "Configure",
+    "GetPowerMode",
+    "SetPowerMode",
+    "GetOsrOdr",
+    "SetOsrOdr",
+    "GetEffectiveOsr",
+    "GetIir",
+    "SetIir",
+    "ConfigureInterrupt",
+    "SelectInterruptSources",
+    "ReadInterruptStatus",
+    "DataReady",
+    "ReadSample",
+    "DecodeSample",
+    "ReadNvm",
+    "ReadRegister",
+    "WriteRegister"
+  ],
+  "port_hooks": [
+    "WriteRegs",
+    "ReadRegs",
+    "DelayUs",
+    "EnsureInitialized"
+  ],
+  "sources": [
+    "inc/bmp581_driver.hpp:Driver public members",
+    "inc/bmp581_bus_interface.hpp:BusInterface"
+  ]
+}
