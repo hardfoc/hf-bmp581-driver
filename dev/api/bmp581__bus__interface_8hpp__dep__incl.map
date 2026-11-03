@@ -1,0 +1,8 @@
+<map id="inc/bmp581_bus_interface.hpp" name="inc/bmp581_bus_interface.hpp">
+<area shape="rect" id="Node000001" title="CRTP register transport for the Bosch BMP581 (I2C or SPI)." alt="" coords="5,5,227,31"/>
+<area shape="rect" id="Node000002" href="$bmp581_8hpp.html" title="Umbrella header for the HF&#45;BMP581 barometric pressure sensor driver." alt="" coords="53,152,179,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,43,83,79,82,99,87,118,108,150,103,153,83,120,76,100,77,78,96,41"/>
+<area shape="rect" id="Node000003" href="$bmp581__driver_8hpp.html" title="Bosch BMP581 barometric pressure sensor client (I2C or SPI via CRTP bus)." alt="" coords="92,79,263,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="137,40,169,77,165,80,133,43"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="160,116,128,154,124,150,156,113"/>
+</map>
